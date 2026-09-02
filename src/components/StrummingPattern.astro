@@ -1,0 +1,131 @@
+---
+import type { Stroke } from "@/data/rhythms";
+
+interface Props {
+  pattern: Stroke[];
+  bpm: number;
+  id: string;
+}
+const { pattern, bpm, id } = Astro.props;
+---
+
+<div class="strum" data-pattern={JSON.stringify(pattern)} data-bpm={bpm} data-id={id}>
+  <div class="strum-row">
+    {pattern.map((s, i) => (
+      <div class="strum-cell" data-index={i}>
+        <span class="strum-symbol">{s === "D" ? "↓" : s === "U" ? "↑" : "·"}</span>
+      </div>
+    ))}
+  </div>
+  <div class="strum-controls">
+    <button type="button" class="strum-play">▶ Escuchar patrón</button>
+    <label class="strum-bpm-label">
+      BPM
+      <input type="number" class="strum-bpm" min="40" max="200" value={bpm} />
+    </label>
+  </div>
+</div>
+
+<style>
+  .strum {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .strum-row {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+  .strum-cell {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #334155;
+    transition: background 0.08s ease, color 0.08s ease, transform 0.08s ease;
+  }
+  .strum-cell.on {
+    background: #f59e0b;
+    color: white;
+    transform: scale(1.1);
+  }
+  .strum-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .strum-play {
+    background: #0f766e;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .strum-bpm-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.875rem;
+  }
+  .strum-bpm {
+    width: 4rem;
+    padding: 0.25rem;
+    border-radius: 0.375rem;
+    border: 1px solid #cbd5e1;
+  }
+</style>
+
+<script>
+  import { playStrum, unlockAudio } from "@/lib/audio";
+  import type { Stroke } from "@/data/rhythms";
+
+  function initStrum(root: HTMLElement) {
+    const pattern = JSON.parse(root.dataset.pattern ?? "[]") as Stroke[];
+    const cells = Array.from(root.querySelectorAll<HTMLElement>(".strum-cell"));
+    const playBtn = root.querySelector<HTMLButtonElement>(".strum-play")!;
+    const bpmInput = root.querySelector<HTMLInputElement>(".strum-bpm")!;
+
+    let playing = false;
+    let timerId: number | undefined;
+
+    function stop() {
+      playing = false;
+      playBtn.textContent = "▶ Escuchar patrón";
+      if (timerId) window.clearInterval(timerId);
+      cells.forEach((c) => c.classList.remove("on"));
+    }
+
+    function play() {
+      unlockAudio();
+      playing = true;
+      playBtn.textContent = "■ Detener";
+      const bpm = Number(bpmInput.value) || 80;
+      const eighthMs = (60 / bpm / 2) * 1000;
+      let i = 0;
+      const step = () => {
+        cells.forEach((c) => c.classList.remove("on"));
+        const stroke = pattern[i];
+        const cell = cells[i];
+        cell?.classList.add("on");
+        if (stroke === "D" || stroke === "U") playStrum(stroke);
+        i = (i + 1) % pattern.length;
+      };
+      step();
+      timerId = window.setInterval(step, eighthMs);
+    }
+
+    playBtn.addEventListener("click", () => {
+      playing ? stop() : play();
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>(".strum").forEach(initStrum);
+</script>

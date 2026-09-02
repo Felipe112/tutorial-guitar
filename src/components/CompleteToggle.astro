@@ -1,0 +1,65 @@
+---
+interface Props {
+  id: string; // id completo, ej. "exercises:ex-01"
+  label?: string;
+}
+const { id, label = "Marcar como hecho" } = Astro.props;
+---
+
+<button type="button" class="complete-toggle" data-id={id}>
+  <span class="check-icon">✓</span>
+  <span class="check-text">{label}</span>
+</button>
+
+<style>
+  .complete-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    border: 1.5px solid #cbd5e1;
+    background: white;
+    color: #475569;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .complete-toggle .check-icon {
+    opacity: 0.35;
+  }
+  .complete-toggle.done {
+    background: #ecfdf5;
+    border-color: #10b981;
+    color: #047857;
+  }
+  .complete-toggle.done .check-icon {
+    opacity: 1;
+  }
+</style>
+
+<script>
+  import { isCompleted, toggleCompleted } from "@/lib/storage";
+
+  function initToggle(btn: HTMLButtonElement) {
+    const id = btn.dataset.id!;
+    const text = btn.querySelector(".check-text")!;
+    const doneLabel = "¡Hecho!";
+    const originalLabel = text.textContent ?? "Marcar como hecho";
+
+    function render(done: boolean) {
+      btn.classList.toggle("done", done);
+      text.textContent = done ? doneLabel : originalLabel;
+    }
+
+    render(isCompleted(id));
+
+    btn.addEventListener("click", () => {
+      const nowDone = toggleCompleted(id);
+      render(nowDone);
+      btn.dispatchEvent(new CustomEvent("tg:progress-change", { bubbles: true }));
+    });
+  }
+
+  document.querySelectorAll<HTMLButtonElement>(".complete-toggle").forEach(initToggle);
+</script>

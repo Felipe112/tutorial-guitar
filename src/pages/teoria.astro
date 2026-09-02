@@ -1,0 +1,90 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { theoryTopics, pillarTopics } from "@/data/theory";
+
+const allTopics = [...pillarTopics, ...theoryTopics];
+---
+
+<Layout title="Teoría básica" description="Teoría musical básica para principiantes de guitarra: ritmo, melodía, armonía, notas, compases y acordes.">
+  <h1 class="page-title">Teoría musical básica</h1>
+  <p class="page-lead">
+    Lo mínimo que necesitas entender para que la práctica tenga sentido. No hace falta memorizar todo de una vez.
+  </p>
+
+  <div class="theory-grid">
+    {allTopics.map((t) => (
+      <article class="theory-card">
+        <div class="theory-head">
+          <h3>{t.title}</h3>
+          {t.category === "pilar" && <span class="badge">pilar</span>}
+        </div>
+        <p class="summary-text">{t.summary}</p>
+        <ul>
+          {t.points.map((p) => <li>{p}</li>)}
+        </ul>
+      </article>
+    ))}
+  </div>
+</Layout>
+
+<style>
+  .theory-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+  @media (max-width: 64rem) {
+    .theory-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 40rem) {
+    .theory-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .theory-card {
+    background: linear-gradient(160deg, #0f172a, #1e293b);
+    border: 1px solid #1e293b;
+    border-radius: 0.9rem;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .theory-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  .theory-head h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    color: #f59e0b;
+  }
+  .badge {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    white-space: nowrap;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+  }
+  .summary-text {
+    color: #e2e8f0;
+    font-size: 0.88rem;
+    margin: 0;
+  }
+  .theory-card ul {
+    margin: 0.35rem 0 0;
+    padding-left: 1.1rem;
+    color: #cbd5e1;
+    font-size: 0.88rem;
+    display: grid;
+    gap: 0.3rem;
+  }
+</style>

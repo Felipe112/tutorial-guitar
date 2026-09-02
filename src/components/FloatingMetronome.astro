@@ -1,0 +1,355 @@
+---
+// Metrónomo flotante global: vive en el Layout (una sola vez, en todas las
+// páginas), minimizado por defecto, arrastrable, y con su posición/estado
+// guardados en localStorage para que se sienta "siempre en el mismo lugar"
+// aunque cada navegación recargue la página (sitio estático multipágina).
+---
+
+<div class="floating-metronome" id="floating-metronome">
+  <button type="button" class="fm-fab" id="fm-fab" aria-label="Abrir metrónomo" title="Metrónomo">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#1e293b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M7 21 L10 4 L14 4 L17 21 Z" />
+      <path d="M6.3 21 H17.7" />
+      <path d="M12.5 6 L9.5 18" />
+      <circle cx="11" cy="13" r="1.4" fill="#1e293b" stroke="none" />
+    </svg>
+  </button>
+
+  <div class="fm-panel" id="fm-panel">
+    <div class="fm-header" id="fm-drag-handle">
+      <span class="fm-title">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M7 21 L10 4 L14 4 L17 21 Z" />
+          <path d="M6.3 21 H17.7" />
+          <path d="M12.5 6 L9.5 18" />
+          <circle cx="11" cy="13" r="1.4" fill="#f59e0b" stroke="none" />
+        </svg>
+        Metrónomo
+      </span>
+      <button type="button" class="fm-close" id="fm-close" aria-label="Minimizar metrónomo">–</button>
+    </div>
+    <div class="fm-body">
+      <div class="fm-controls">
+        <button type="button" class="fm-play" id="fm-play" aria-label="Iniciar metrónomo">▶</button>
+        <div class="fm-bpm">
+          <button type="button" class="fm-bpm-step" id="fm-bpm-down" aria-label="Reducir BPM">−</button>
+          <span><strong id="fm-bpm-value">80</strong> BPM</span>
+          <button type="button" class="fm-bpm-step" id="fm-bpm-up" aria-label="Aumentar BPM">+</button>
+        </div>
+      </div>
+      <input type="range" id="fm-bpm-range" min="40" max="220" value="80" />
+      <div class="fm-dots" id="fm-dots">
+        <span class="fm-dot"></span>
+        <span class="fm-dot"></span>
+        <span class="fm-dot"></span>
+        <span class="fm-dot"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .floating-metronome {
+    position: fixed;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    z-index: 200;
+    touch-action: none;
+  }
+  .fm-fab {
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 999px;
+    background: #f59e0b;
+    border: none;
+    font-size: 1.5rem;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.3);
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .fm-fab:active {
+    cursor: grabbing;
+  }
+  .floating-metronome.open .fm-fab {
+    display: none;
+  }
+  .fm-panel {
+    display: none;
+    width: 15rem;
+    background: #1e293b;
+    color: white;
+    border-radius: 0.9rem;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.35);
+    overflow: hidden;
+  }
+  .floating-metronome.open .fm-panel {
+    display: block;
+  }
+  .fm-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #0f172a;
+    padding: 0.5rem 0.75rem;
+    cursor: grab;
+  }
+  .fm-header:active {
+    cursor: grabbing;
+  }
+  .fm-title {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+  .fm-close {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 1.15rem;
+    line-height: 1;
+    padding: 0.1rem 0.4rem;
+    cursor: pointer;
+  }
+  .fm-close:hover {
+    color: white;
+  }
+  .fm-body {
+    padding: 0.85rem 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .fm-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  .fm-play {
+    width: 2.5rem;
+    height: 2.5rem;
+    flex-shrink: 0;
+    background: #f59e0b;
+    color: #1e293b;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .fm-play.playing {
+    background: #ef4444;
+    color: white;
+  }
+  .fm-bpm {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .fm-bpm-step {
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 999px;
+    border: 1px solid #475569;
+    background: #334155;
+    color: white;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+  }
+  #fm-bpm-range {
+    width: 100%;
+    accent-color: #f59e0b;
+  }
+  .fm-dots {
+    display: flex;
+    gap: 0.4rem;
+    justify-content: center;
+  }
+  .fm-dot {
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 999px;
+    background: #475569;
+    transition: transform 0.06s ease, background 0.06s ease;
+  }
+  .fm-dot.on {
+    background: #f59e0b;
+    transform: scale(1.3);
+  }
+</style>
+
+<script>
+  import { playClick, unlockAudio } from "@/lib/audio";
+
+  const POS_KEY = "tg:metronome-pos";
+  const OPEN_KEY = "tg:metronome-open";
+  const BPM_KEY = "tg:metronome-bpm";
+  const BEATS_PER_BAR = 4;
+
+  const wrapper = document.getElementById("floating-metronome")!;
+  const fab = document.getElementById("fm-fab") as HTMLButtonElement;
+  const closeBtn = document.getElementById("fm-close") as HTMLButtonElement;
+  const header = document.getElementById("fm-drag-handle")!;
+  const playBtn = document.getElementById("fm-play") as HTMLButtonElement;
+  const bpmValueEl = document.getElementById("fm-bpm-value")!;
+  const bpmRange = document.getElementById("fm-bpm-range") as HTMLInputElement;
+  const bpmDown = document.getElementById("fm-bpm-down") as HTMLButtonElement;
+  const bpmUp = document.getElementById("fm-bpm-up") as HTMLButtonElement;
+  const dots = Array.from(document.querySelectorAll<HTMLElement>("#fm-dots .fm-dot"));
+
+  // ---------- posición (arrastrable, persistida) ----------
+  try {
+    const saved = JSON.parse(localStorage.getItem(POS_KEY) ?? "null") as { left: number; top: number } | null;
+    if (saved) {
+      wrapper.style.left = `${saved.left}px`;
+      wrapper.style.top = `${saved.top}px`;
+      wrapper.style.right = "auto";
+      wrapper.style.bottom = "auto";
+    }
+  } catch {
+    // localStorage no disponible: se queda en la posición por defecto (CSS).
+  }
+
+  let suppressClick = false;
+
+  function setupDrag(handle: HTMLElement) {
+    let dragging = false;
+    let moved = false;
+    let startX = 0;
+    let startY = 0;
+    let originLeft = 0;
+    let originTop = 0;
+
+    handle.addEventListener("pointerdown", (e) => {
+      // No inicies un arrastre si el gesto empieza sobre el botón de
+      // minimizar: debe comportarse como un botón normal, sin interferencia
+      // del pointer capture del drag.
+      if ((e.target as HTMLElement).closest("#fm-close")) return;
+      dragging = true;
+      moved = false;
+      startX = e.clientX;
+      startY = e.clientY;
+      const rect = wrapper.getBoundingClientRect();
+      originLeft = rect.left;
+      originTop = rect.top;
+      handle.setPointerCapture(e.pointerId);
+    });
+
+    handle.addEventListener("pointermove", (e) => {
+      if (!dragging) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) moved = true;
+      if (!moved) return;
+      const rect = wrapper.getBoundingClientRect();
+      const left = Math.min(Math.max(4, originLeft + dx), window.innerWidth - rect.width - 4);
+      const top = Math.min(Math.max(4, originTop + dy), window.innerHeight - rect.height - 4);
+      wrapper.style.left = `${left}px`;
+      wrapper.style.top = `${top}px`;
+      wrapper.style.right = "auto";
+      wrapper.style.bottom = "auto";
+    });
+
+    function endDrag() {
+      if (!dragging) return;
+      dragging = false;
+      if (moved) {
+        suppressClick = true;
+        const rect = wrapper.getBoundingClientRect();
+        localStorage.setItem(POS_KEY, JSON.stringify({ left: rect.left, top: rect.top }));
+        setTimeout(() => {
+          suppressClick = false;
+        }, 0);
+      }
+    }
+    handle.addEventListener("pointerup", endDrag);
+    handle.addEventListener("pointercancel", endDrag);
+  }
+  setupDrag(fab);
+  setupDrag(header);
+
+  // ---------- abrir / minimizar (persistido) ----------
+  function setOpen(open: boolean) {
+    wrapper.classList.toggle("open", open);
+    localStorage.setItem(OPEN_KEY, open ? "1" : "0");
+  }
+  setOpen(localStorage.getItem(OPEN_KEY) === "1");
+
+  fab.addEventListener("click", () => {
+    if (suppressClick) return;
+    unlockAudio();
+    setOpen(true);
+  });
+
+  // Minimizar: el botón "–" explícito, o un clic en cualquier parte del
+  // encabezado (incluido el título), siempre que no haya sido un arrastre.
+  header.addEventListener("click", () => {
+    if (suppressClick) return;
+    setOpen(false);
+  });
+  closeBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    setOpen(false);
+  });
+
+  // ---------- metrónomo (bpm persistido, play/pause) ----------
+  let bpm = Number(localStorage.getItem(BPM_KEY)) || Number(bpmRange.value);
+  bpmRange.value = String(bpm);
+  bpmValueEl.textContent = String(bpm);
+
+  let playing = false;
+  let beat = 0;
+  let timerId: number | undefined;
+
+  function setBpm(next: number) {
+    bpm = Math.min(220, Math.max(40, next));
+    bpmRange.value = String(bpm);
+    bpmValueEl.textContent = String(bpm);
+    localStorage.setItem(BPM_KEY, String(bpm));
+    if (playing) restart();
+  }
+
+  function tick() {
+    playClick(beat === 0);
+    dots.forEach((d, i) => d.classList.toggle("on", i === beat));
+    beat = (beat + 1) % BEATS_PER_BAR;
+  }
+
+  function start() {
+    unlockAudio();
+    playing = true;
+    playBtn.textContent = "■";
+    playBtn.classList.add("playing");
+    beat = 0;
+    tick();
+    timerId = window.setInterval(tick, (60 / bpm) * 1000);
+  }
+
+  function stop() {
+    playing = false;
+    playBtn.textContent = "▶";
+    playBtn.classList.remove("playing");
+    if (timerId) window.clearInterval(timerId);
+    dots.forEach((d) => d.classList.remove("on"));
+  }
+
+  function restart() {
+    stop();
+    start();
+  }
+
+  playBtn.addEventListener("click", () => {
+    unlockAudio();
+    playing ? stop() : start();
+  });
+  bpmRange.addEventListener("input", () => setBpm(Number(bpmRange.value)));
+  bpmDown.addEventListener("click", () => setBpm(bpm - 5));
+  bpmUp.addEventListener("click", () => setBpm(bpm + 5));
+</script>

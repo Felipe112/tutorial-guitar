@@ -1,0 +1,154 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import StrummingPattern from "@/components/StrummingPattern.astro";
+import { rhythms } from "@/data/rhythms";
+import { genreRhythms } from "@/data/genreRhythms";
+---
+
+<Layout title="Ritmos" description="Patrones de rasgueo básicos para guitarra, más ritmos específicos por género musical, con reproducción de audio y metrónomo integrado.">
+  <h1 class="page-title">Ritmos y rasgueos básicos</h1>
+  <p class="page-lead">
+    ↓ = rasgueo hacia abajo, ↑ = rasgueo hacia arriba, · = silencio (no rasgues, pero mueve la mano igual).
+    Dale play para escuchar el patrón antes de intentarlo.
+  </p>
+
+  <div class="rhythm-list">
+    {rhythms.map((r) => (
+      <article class="rhythm-card" id={r.id}>
+        <div class="rhythm-head">
+          <h3>{r.title}</h3>
+          <span class="badge">{r.timeSignature}</span>
+        </div>
+        <p>{r.description}</p>
+        <StrummingPattern pattern={r.pattern} bpm={r.bpm} id={r.id} />
+      </article>
+    ))}
+  </div>
+
+  <h2 class="genre-title">Ritmos por género musical</h2>
+  <p class="lead">
+    Elige un género y escucha 2 patrones típicos de ese estilo.
+  </p>
+
+  <div class="genre-list">
+    {genreRhythms.map((genre) => (
+      <details class="genre-card">
+        <summary>
+          <span class="genre-emoji">{genre.emoji}</span>
+          <span class="genre-name">{genre.name}</span>
+        </summary>
+        <div class="genre-rhythm-list">
+          {genre.rhythms.map((r) => (
+            <article class="rhythm-card genre-rhythm-card" id={r.id}>
+              <div class="rhythm-head">
+                <h3>{r.title}</h3>
+                <span class="badge">{r.timeSignature}</span>
+              </div>
+              <p>{r.description}</p>
+              <StrummingPattern pattern={r.pattern} bpm={r.bpm} id={r.id} />
+            </article>
+          ))}
+        </div>
+      </details>
+    ))}
+  </div>
+</Layout>
+
+<style>
+  .lead {
+    color: #475569;
+    max-width: 42rem;
+    margin-bottom: 1.5rem;
+  }
+  .rhythm-list {
+    display: grid;
+    gap: 1.25rem;
+  }
+  .rhythm-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.9rem;
+    padding: 1.25rem;
+    min-width: 0;
+  }
+  .rhythm-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .rhythm-head h3 {
+    margin: 0;
+    font-weight: 700;
+  }
+  .badge {
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+  }
+  .rhythm-card p {
+    color: #475569;
+    margin: 0.35rem 0 0.85rem;
+  }
+  .genre-title {
+    margin-top: 2.5rem;
+  }
+  .genre-list {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+  .genre-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.9rem;
+    padding: 1rem 1.25rem;
+    transition: border-color 0.1s ease, box-shadow 0.1s ease;
+  }
+  .genre-card[open] {
+    border-color: #f59e0b;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+  }
+  .genre-card summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .genre-card summary::-webkit-details-marker {
+    display: none;
+  }
+  .genre-emoji {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+  .genre-name {
+    font-weight: 700;
+    font-size: 1.05rem;
+    flex: 1;
+  }
+  .genre-card summary::after {
+    content: "Ver ritmos ▾";
+    font-size: 0.75rem;
+    color: #0f766e;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .genre-card[open] summary::after {
+    content: "Ocultar ▴";
+  }
+  .genre-rhythm-list {
+    display: grid;
+    gap: 0.85rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  .genre-rhythm-card {
+    background: #f8fafc;
+  }
+</style>

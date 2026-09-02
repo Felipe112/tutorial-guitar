@@ -1,0 +1,293 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import CompleteToggle from "@/components/CompleteToggle.astro";
+import ChordTag from "@/components/ChordTag.astro";
+import TabPlayer from "@/components/TabPlayer.astro";
+import { exercises } from "@/data/exercises";
+import { genreExercises } from "@/data/genreExercises";
+---
+
+<Layout title="Ejercicios diarios" description="Ejercicios de guitarra para principiantes: calentamiento, digitación, cambios de acorde y técnica.">
+  <h1 class="page-title">Ejercicios diarios</h1>
+  <p class="page-lead">
+    Dedica 15–20 minutos al día. No necesitas hacerlos todos: elige 2 o 3 y márcalos al terminar.
+  </p>
+
+  <div class="exercise-list">
+    {exercises.map((ex) => (
+      <details class="exercise-card" id={ex.id} open>
+        <summary class="exercise-head">
+          <h3>{ex.title}</h3>
+          <span class="badge">{ex.level} · {ex.minutes} min</span>
+          <span class="done-badge">✓ Hecho</span>
+        </summary>
+        <div class="exercise-body">
+          <p>{ex.description}</p>
+          <ol>
+            {ex.steps.map((step) => <li>{step}</li>)}
+          </ol>
+          {ex.relatedChords && (
+            <div class="related-chords">
+              <span>Formas usadas (pasa el cursor):</span>
+              {ex.relatedChords.map((id) => <ChordTag chordId={id} />)}
+            </div>
+          )}
+          {ex.example && (
+            <div class="example-block">
+              <span class="example-label">Ejemplo tocable:</span>
+              <TabPlayer notes={ex.example.notes} bpm={ex.example.bpm} />
+            </div>
+          )}
+          <CompleteToggle id={`exercises:${ex.id}`} />
+        </div>
+      </details>
+    ))}
+  </div>
+
+  <h2 class="genre-title">Ejercicios por género musical</h2>
+  <p class="lead">
+    Opcionales: elige el o los géneros que más te gusten y practícalos a tu ritmo. No forman parte de la
+    rutina general de arriba.
+  </p>
+
+  <div class="genre-list">
+    {genreExercises.map((genre) => (
+      <details class="genre-card">
+        <summary>
+          <span class="genre-emoji">{genre.emoji}</span>
+          <span class="genre-summary-text">
+            <span class="genre-name">{genre.name}</span>
+            <span class="genre-blurb">{genre.blurb}</span>
+          </span>
+        </summary>
+        <div class="genre-exercise-list">
+          {genre.exercises.map((ex) => (
+            <details class="exercise-card genre-exercise-card" id={ex.id} open>
+              <summary class="exercise-head">
+                <h3>{ex.title}</h3>
+                <span class="badge">{ex.level} · {ex.minutes} min</span>
+                <span class="done-badge">✓ Hecho</span>
+              </summary>
+              <div class="exercise-body">
+                <p>{ex.description}</p>
+                <ol>
+                  {ex.steps.map((step) => <li>{step}</li>)}
+                </ol>
+                {ex.relatedChords && (
+                  <div class="related-chords">
+                    <span>Formas usadas (pasa el cursor):</span>
+                    {ex.relatedChords.map((id) => <ChordTag chordId={id} />)}
+                  </div>
+                )}
+                {ex.example && (
+                  <div class="example-block">
+                    <span class="example-label">Ejemplo tocable:</span>
+                    <TabPlayer notes={ex.example.notes} bpm={ex.example.bpm} />
+                  </div>
+                )}
+                <CompleteToggle id={`genre:${genre.id}:${ex.id}`} />
+              </div>
+            </details>
+          ))}
+        </div>
+      </details>
+    ))}
+  </div>
+</Layout>
+
+<style>
+  .lead {
+    color: #475569;
+    max-width: 40rem;
+  }
+  .exercise-list {
+    display: grid;
+    gap: 1rem;
+  }
+  .exercise-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.9rem;
+    padding: 1.25rem;
+    transition: border-color 0.1s ease, box-shadow 0.1s ease;
+    min-width: 0;
+  }
+  .exercise-card[open] {
+    border-color: #f59e0b;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+  }
+  .exercise-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    cursor: pointer;
+    list-style: none;
+  }
+  .exercise-head::-webkit-details-marker {
+    display: none;
+  }
+  .exercise-head h3 {
+    margin: 0;
+    font-weight: 700;
+  }
+  .badge {
+    background: #fef3c7;
+    color: #92400e;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .exercise-card:not([open]) .badge {
+    display: none;
+  }
+  .done-badge {
+    display: none;
+    align-items: center;
+    background: #dcfce7;
+    color: #166534;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .exercise-card.done:not([open]) .done-badge {
+    display: inline-flex;
+  }
+  .exercise-body {
+    margin-top: 0.75rem;
+  }
+  .exercise-card p {
+    color: #475569;
+  }
+  .exercise-card ol {
+    margin: 0.5rem 0 1rem;
+    padding-left: 1.25rem;
+    color: #334155;
+    display: grid;
+    gap: 0.25rem;
+  }
+  .related-chords {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-bottom: 0.85rem;
+  }
+  .example-block {
+    margin-bottom: 0.85rem;
+  }
+  .example-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: #64748b;
+    margin-bottom: 0.4rem;
+  }
+  .genre-title {
+    margin-top: 2.5rem;
+  }
+  .genre-list {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+  .genre-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.9rem;
+    padding: 1rem 1.25rem;
+    transition: border-color 0.1s ease, box-shadow 0.1s ease;
+  }
+  .genre-card[open] {
+    border-color: #f59e0b;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+  }
+  .genre-card > summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .genre-card > summary::-webkit-details-marker {
+    display: none;
+  }
+  .genre-emoji {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+  .genre-summary-text {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+  .genre-name {
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
+  .genre-blurb {
+    color: #64748b;
+    font-size: 0.85rem;
+  }
+  .genre-card > summary::after {
+    content: "Ver ejercicios ▾";
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: #0f766e;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .genre-card[open] > summary::after {
+    content: "Ocultar ▴";
+  }
+  .genre-exercise-list {
+    display: grid;
+    gap: 0.85rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  .genre-exercise-card {
+    background: #f8fafc;
+  }
+</style>
+
+<script>
+  import { isCompleted } from "@/lib/storage";
+
+  function initExerciseAccordion(details: HTMLDetailsElement) {
+    const toggleId = details.querySelector<HTMLButtonElement>(".complete-toggle")?.dataset.id;
+    if (!toggleId) return;
+
+    function sync() {
+      const done = isCompleted(toggleId!);
+      details.classList.toggle("done", done);
+      return done;
+    }
+
+    // Si ya estaba marcado como hecho en una visita anterior, arranca colapsado.
+    if (sync()) {
+      details.open = false;
+    }
+
+    details.addEventListener("tg:progress-change", () => {
+      const done = sync();
+      if (done) {
+        details.open = false;
+      }
+    });
+  }
+
+  document.querySelectorAll<HTMLDetailsElement>(".exercise-card").forEach(initExerciseAccordion);
+</script>

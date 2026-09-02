@@ -1,0 +1,63 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import ChordDiagram from "@/components/ChordDiagram.astro";
+import FingerLegend from "@/components/FingerLegend.astro";
+import { openChords, barreChords, chordAlternatives } from "@/data/chords";
+---
+
+<Layout title="Acordes" description="Los 12 acordes mayores y 12 menores para guitarra, abiertos y con cejilla, con alternativas sin cejilla y diagrama de dedos a color.">
+  <h1 class="page-title">Acordes</h1>
+  <p class="page-lead">
+    ✕ = cuerda que NO se toca. ○ = cuerda al aire (sin dedo). Cada dedo tiene su propio color para que sea
+    más fácil ubicarlo de un vistazo:
+  </p>
+  <FingerLegend />
+
+  <h2 class="section-title">Abiertos — empieza por aquí</h2>
+  <p class="lead-small">Sin cejilla, ideales para tus primeras semanas.</p>
+  <div class="chord-grid">
+    {openChords.map((c) => (
+      <ChordDiagram chord={c} />
+    ))}
+  </div>
+
+  <h2 class="section-title">Con cejilla — cuando ya tengas soltura</h2>
+  <p class="lead-small">
+    Todos los demás acordes mayores y menores. El dedo 1 hace de "cejuela móvil": tienes que apretar bien recto
+    para que suenen todas las cuerdas. Es normal que al principio salgan apagadas. Si ves una ⭐ junto al nombre,
+    hay una versión sin cejilla más abajo.
+  </p>
+  <div class="chord-grid">
+    {barreChords.map((c) => (
+      <ChordDiagram chord={c} />
+    ))}
+  </div>
+
+  <h2 class="section-title">⭐ Alternativas sin cejilla</h2>
+  <p class="lead-small">
+    Versiones simplificadas de los acordes con cejilla: sueltas una o dos cuerdas graves y cada dedo pisa la suya,
+    sin tener que estirar uno solo por encima de varias cuerdas. Ideales mientras ganas fuerza para la cejilla real.
+  </p>
+  <div class="chord-grid">
+    {chordAlternatives.map((c) => (
+      <ChordDiagram chord={c} />
+    ))}
+  </div>
+</Layout>
+
+<style>
+  .lead-small {
+    color: #64748b;
+    font-size: 0.9rem;
+    max-width: 44rem;
+    margin: -0.25rem 0 1rem;
+  }
+  .section-title {
+    margin-top: 2rem;
+  }
+  .chord-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 1rem;
+  }
+</style>

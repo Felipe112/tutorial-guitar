@@ -1,0 +1,230 @@
+---
+import { chordById, alternativeIdFor, type ChordShape } from "@/data/chords";
+import { fingerColor } from "@/lib/fingerColors";
+
+interface Props {
+  chord: ChordShape;
+}
+const { chord } = Astro.props;
+
+const frets = 4; // filas de trastes mostradas, empezando en chord.baseFret
+const baseFret = chord.baseFret;
+const byString = [...chord.positions].sort((a, b) => a.string - b.string); // 0=6ta..5=1ra, orden visual izq→der
+const barreSpans = chord.barreSpans ?? [];
+const altId = chord.difficulty === "cejilla" ? alternativeIdFor(chord.id) : undefined;
+const originalChord = chord.alternativeTo ? chordById(chord.alternativeTo) : undefined;
+---
+
+<div id={`chord-${chord.id}`} class="chord-diagram">
+  <div class="chord-head">
+    <h3>{chord.name} <span class="short">({chord.shortName})</span></h3>
+    <div class="chord-head-right">
+      {altId && (
+        <a href={`#chord-${altId}`} class="alt-star" title="Ver alternativa sin cejilla">⭐</a>
+      )}
+      <span class:list={["type-badge", chord.type]}>{chord.type}</span>
+    </div>
+  </div>
+  {originalChord && (
+    <a href={`#chord-${originalChord.id}`} class="back-link">↩ Ver forma original de {originalChord.shortName} (con cejilla)</a>
+  )}
+
+  <div class="diagram-grid" style={`--frets: ${frets}`}>
+    <div class="marker-row" aria-hidden="true">
+      {byString.map((p) => (
+        <div class="marker-cell">
+          {p.fret === null ? <span class="mute">✕</span> : p.fret === 0 ? <span class="open">○</span> : <span></span>}
+        </div>
+      ))}
+    </div>
+    <div class:list={["grid-body", { "no-nut": baseFret > 1 }]}>
+      {Array.from({ length: frets }).map((_, rowIdx) => {
+        const fretAbs = baseFret + rowIdx;
+        const barre = barreSpans.find((b) => b.fret === fretAbs);
+        return (
+          <div class="grid-row">
+            {barre && (
+              <span
+                class="barre-bar"
+                style={`grid-column: ${barre.fromString + 1} / ${barre.toString + 2}; background: ${fingerColor(barre.finger)}40;`}
+              />
+            )}
+            {byString.map((p) => (
+              <div class="grid-cell">
+                {p.fret !== null && p.fret === fretAbs ? (
+                  <span class="finger-dot" style={`background: ${fingerColor(p.finger)};`}>{p.finger ?? ""}</span>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        );
+      })}
+    </div>
+    {baseFret > 1 && (
+      <div class="fret-numbers" aria-hidden="true">
+        <span class="base-fret-label">{baseFret}fr</span>
+      </div>
+    )}
+  </div>
+
+  {chord.difficulty === "cejilla" && <p class="open-note">Requiere cejilla (dedo 1 pisa varias cuerdas a la vez).</p>}
+
+  <p class="chord-tip">{chord.tip}</p>
+</div>
+
+<style>
+  .chord-diagram {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.9rem;
+    padding: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    min-width: 0;
+  }
+  .chord-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  .chord-head h3 {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+  .short {
+    color: #64748b;
+    font-weight: 600;
+  }
+  .chord-head-right {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+  }
+  .alt-star {
+    font-size: 1.1rem;
+    line-height: 1;
+    text-decoration: none;
+    filter: grayscale(0.15);
+  }
+  .alt-star:hover {
+    transform: scale(1.15);
+    display: inline-block;
+  }
+  .back-link {
+    font-size: 0.78rem;
+    color: #0f766e;
+    font-weight: 600;
+    text-decoration: none;
+    margin-top: -0.3rem;
+  }
+  .back-link:hover {
+    text-decoration: underline;
+  }
+  .type-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+  }
+  .type-badge.mayor {
+    background: #dbeafe;
+    color: #1d4ed8;
+  }
+  .type-badge.menor {
+    background: #ede9fe;
+    color: #6d28d9;
+  }
+  .diagram-grid {
+    display: grid;
+    justify-content: center;
+    gap: 2px;
+  }
+  .marker-row,
+  .grid-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1.9rem);
+    position: relative;
+  }
+  .marker-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    height: 1.3rem;
+    color: #475569;
+  }
+  .marker-cell .mute {
+    color: #ef4444;
+  }
+  .marker-cell .open {
+    color: #10b981;
+  }
+  .grid-body {
+    border-top: 3px solid #1e293b;
+    background-image: repeating-linear-gradient(
+      to right,
+      #cbd5e1 0,
+      #cbd5e1 1px,
+      transparent 1px,
+      transparent 1.9rem
+    );
+  }
+  .grid-body.no-nut {
+    border-top: 1px solid #cbd5e1;
+  }
+  .grid-row {
+    border-bottom: 1px solid #cbd5e1;
+    height: 2.1rem;
+  }
+  .grid-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+  }
+  .barre-bar {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 1.4rem;
+    background: rgba(245, 158, 11, 0.35);
+    border-radius: 999px;
+    z-index: 0;
+  }
+  .finger-dot {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 999px;
+    color: white;
+    font-weight: 800;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .fret-numbers {
+    display: flex;
+  }
+  .base-fret-label {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    font-weight: 700;
+  }
+  .open-note {
+    font-size: 0.8rem;
+    color: #b45309;
+    margin: 0;
+    font-weight: 600;
+  }
+  .chord-tip {
+    font-size: 0.85rem;
+    color: #475569;
+    margin: 0;
+  }
+</style>

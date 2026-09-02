@@ -1,0 +1,255 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { exercises } from "@/data/exercises";
+import { genreExercises } from "@/data/genreExercises";
+import { weeklyPlan, buildExtendedPlan } from "@/data/weeklyPlan";
+
+const totalExercises =
+  exercises.length + genreExercises.reduce((sum, g) => sum + g.exercises.length, 0);
+
+const planKeysByVariant = {
+  semanal: weeklyPlan.map((d) => `plan:${d.key}`),
+  quincenal: buildExtendedPlan(15, "quincenal").map((d) => `plan:${d.key}`),
+  mensual: buildExtendedPlan(30, "mensual").map((d) => `plan:${d.key}`),
+};
+
+const planLabels = {
+  semanal: "plan semanal",
+  quincenal: "plan quincenal",
+  mensual: "plan mensual",
+};
+
+const sections = [
+  {
+    href: "/plan",
+    emoji: "📅",
+    title: "Planes",
+    desc: "Rutina semanal, quincenal o mensual: calentamiento, ejercicios clave y un hábito diario fijo.",
+  },
+  {
+    href: "/ejercicios",
+    emoji: "🏋️",
+    title: "Ejercicios diarios",
+    desc: "Calentamiento, digitación, cambios de acorde y técnica paso a paso.",
+  },
+  {
+    href: "/acordes",
+    emoji: "🖐️",
+    title: "Acordes básicos",
+    desc: "Diagramas a color con qué dedo va en cada cuerda, cuáles se apagan y cuáles van al aire.",
+  },
+  {
+    href: "/ritmos",
+    emoji: "🥁",
+    title: "Ritmos y rasgueos",
+    desc: "Patrones de rasgueo con metrónomo, audio y ritmos por género musical.",
+  },
+  {
+    href: "/teoria",
+    emoji: "📖",
+    title: "Teoría musical básica",
+    desc: "Ritmo, melodía, armonía, compases, acordes y escalas explicados simple.",
+  },
+  {
+    href: "/arpegios",
+    emoji: "🎶",
+    title: "Arpegios básicos",
+    desc: "Patrones de dedos (p-i-m-a) para acordes abiertos comunes.",
+  },
+  {
+    href: "/melodias",
+    emoji: "🎵",
+    title: "Primeras melodías",
+    desc: "Tablaturas interactivas con reproducción nota por nota.",
+  },
+  {
+    href: "/retos",
+    emoji: "🔥",
+    title: "Retos diarios",
+    desc: "Un reto nuevo cada día. Súmalos y construye tu racha.",
+  },
+];
+---
+
+<Layout title="Inicio" description="Aprende a tocar guitarra desde cero con ejercicios interactivos, notas, ritmos, arpegios y retos diarios.">
+  <section class="hero">
+    <h1 class="page-title">Aprende guitarra, un día a la vez 🎸</h1>
+    <p class="page-lead">
+      Ejercicios, notas, ritmos, arpegios y melodías interactivas para principiantes.
+      Todo en tu navegador, sin registro.
+    </p>
+    <div class="stats-row" id="home-stats">
+      <div class="stat-card">
+        <span class="stat-value" id="stat-streak">0</span>
+        <span class="stat-label">días de racha</span>
+      </div>
+      
+      <div class="stat-card progress-card">
+        <div class="progress-head">
+          <span class="stat-value" id="stat-exercises-pct">0%</span>
+          <span class="progress-count" id="exercises-count">0 / {totalExercises}</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="exercises-fill"></div></div>
+        <span class="stat-label">ejercicios completados</span>
+      </div>
+      <div class="stat-card progress-card">
+        <div class="progress-head">
+          <span class="stat-value" id="stat-plan-pct">0%</span>
+          <span class="progress-count" id="plan-count">0 / 7</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="plan-fill"></div></div>
+        <span class="stat-label" id="plan-label">plan semanal completado</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-grid">
+    {sections.map((s) => (
+      <a href={s.href} class="section-card">
+        <span class="section-emoji">{s.emoji}</span>
+        <h2>{s.title}</h2>
+        <p>{s.desc}</p>
+      </a>
+    ))}
+  </section>
+</Layout>
+
+<style>
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: 1rem;
+  }
+  .stat-card {
+    background: #0f172a;
+    color: white;
+    border-radius: 0.75rem;
+    padding: 1rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .stat-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #f59e0b;
+  }
+  .stat-label {
+    font-size: 0.8rem;
+    color: #cbd5e1;
+  }
+  .progress-card {
+    gap: 0.4rem;
+  }
+  .progress-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  .progress-count {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    font-variant-numeric: tabular-nums;
+  }
+  .progress-track {
+    height: 0.4rem;
+    background: #1e293b;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: #f59e0b;
+    border-radius: 999px;
+    transition: width 0.3s ease;
+  }
+  .section-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  .section-card {
+    display: block;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.9rem;
+    padding: 1.25rem;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.1s ease, box-shadow 0.1s ease, border-color 0.1s ease;
+  }
+  .section-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    border-color: #f59e0b;
+  }
+  .section-emoji {
+    font-size: 1.75rem;
+  }
+  .section-card h2 {
+    font-size: 1.05rem;
+    margin: 0.5rem 0 0.35rem;
+  }
+  .section-card p {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 0;
+  }
+</style>
+
+<script type="application/json" id="home-progress-data" is:inline set:html={JSON.stringify({ totalExercises, planKeysByVariant, planLabels })} />
+
+<script>
+  import {
+    currentStreak,
+    totalCompleted,
+    countCompletedByPrefix,
+    countCompletedAmong,
+    getSelectedPlan,
+    type PlanId,
+  } from "@/lib/storage";
+
+  interface ProgressData {
+    totalExercises: number;
+    planKeysByVariant: Record<PlanId, string[]>;
+    planLabels: Record<PlanId, string>;
+  }
+
+  const dataEl = document.getElementById("home-progress-data");
+  const { totalExercises, planKeysByVariant, planLabels } = JSON.parse(
+    dataEl?.textContent ?? "{}",
+  ) as ProgressData;
+
+  const streakEl = document.getElementById("stat-streak");
+  const completedEl = document.getElementById("stat-completed");
+  if (streakEl) streakEl.textContent = String(currentStreak());
+  if (completedEl) completedEl.textContent = String(totalCompleted());
+
+  // Ejercicios completados (generales + por género) sobre el total del proyecto.
+  const exercisesDone = countCompletedByPrefix("exercises:") + countCompletedByPrefix("genre:");
+  const exercisesPct = totalExercises > 0 ? Math.round((exercisesDone / totalExercises) * 100) : 0;
+  const exPctEl = document.getElementById("stat-exercises-pct");
+  const exCountEl = document.getElementById("exercises-count");
+  const exFillEl = document.getElementById("exercises-fill") as HTMLElement | null;
+  if (exPctEl) exPctEl.textContent = `${exercisesPct}%`;
+  if (exCountEl) exCountEl.textContent = `${exercisesDone} / ${totalExercises}`;
+  if (exFillEl) exFillEl.style.width = `${exercisesPct}%`;
+
+  // Plan elegido (semanal/quincenal/mensual), recordado desde /plan.
+  const selectedPlan = getSelectedPlan();
+  const planKeys = planKeysByVariant[selectedPlan];
+  const planDone = countCompletedAmong(planKeys);
+  const planTotal = planKeys.length;
+  const planPct = planTotal > 0 ? Math.round((planDone / planTotal) * 100) : 0;
+  const planPctEl = document.getElementById("stat-plan-pct");
+  const planCountEl = document.getElementById("plan-count");
+  const planFillEl = document.getElementById("plan-fill") as HTMLElement | null;
+  const planLabelEl = document.getElementById("plan-label");
+  if (planPctEl) planPctEl.textContent = `${planPct}%`;
+  if (planCountEl) planCountEl.textContent = `${planDone} / ${planTotal}`;
+  if (planFillEl) planFillEl.style.width = `${planPct}%`;
+  if (planLabelEl) planLabelEl.textContent = `${planLabels[selectedPlan]} completado`;
+</script>

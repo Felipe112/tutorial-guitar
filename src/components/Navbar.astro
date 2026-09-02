@@ -1,0 +1,177 @@
+---
+const links = [
+  { href: "/", label: "Inicio" },
+  { href: "/plan", label: "Planes" },
+  { href: "/ejercicios", label: "Ejercicios" },
+  { href: "/acordes", label: "Acordes" },
+  { href: "/ritmos", label: "Ritmos" },
+  { href: "/teoria", label: "Teoría" },
+  { href: "/arpegios", label: "Arpegios" },
+  { href: "/melodias", label: "Melodías" },
+  { href: "/retos", label: "Retos" },
+];
+const current = Astro.url.pathname;
+---
+
+<header class="site-header">
+  <div class="site-header-inner">
+    <a href="/" class="brand">🎸 Tutorial Guitar</a>
+    <button
+      type="button"
+      class="menu-toggle"
+      id="menu-toggle"
+      aria-label="Abrir menú"
+      aria-expanded="false"
+      aria-controls="nav-links"
+    >
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+    <nav class="nav-links" id="nav-links" aria-label="Navegación principal">
+      {links.map((link) => (
+        <a
+          href={link.href}
+          class:list={["nav-link", { active: current === link.href }]}
+        >
+          {link.label}
+        </a>
+      ))}
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: #0f172a;
+    border-bottom: 1px solid #1e293b;
+  }
+  .site-header-inner {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .brand {
+    font-weight: 800;
+    font-size: 1.15rem;
+    color: #f8fafc;
+    text-decoration: none;
+    letter-spacing: -0.01em;
+  }
+  .menu-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 2.5rem;
+    height: 2.5rem;
+    background: transparent;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    padding: 0;
+    margin-left: auto;
+  }
+  .menu-toggle:hover {
+    background: #1e293b;
+  }
+  .menu-toggle .bar {
+    display: block;
+    width: 1.4rem;
+    height: 2px;
+    background: #f8fafc;
+    border-radius: 2px;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+  .menu-toggle[aria-expanded="true"] .bar:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+  .menu-toggle[aria-expanded="true"] .bar:nth-child(2) {
+    opacity: 0;
+  }
+  .menu-toggle[aria-expanded="true"] .bar:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+  .nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+  .nav-link {
+    padding: 0.4rem 0.7rem;
+    border-radius: 0.5rem;
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  .nav-link:hover {
+    background: #1e293b;
+    color: white;
+  }
+  .nav-link.active {
+    background: #f59e0b;
+    color: #1e293b;
+  }
+
+  /* Mobile / tablet: menú hamburguesa en vez de los links apretados */
+  @media (max-width: 899px) {
+    .menu-toggle {
+      display: flex;
+    }
+    .nav-links {
+      display: none;
+      width: 100%;
+      order: 3;
+      flex-direction: column;
+      gap: 0.15rem;
+      padding-top: 0.5rem;
+    }
+    .nav-links.open {
+      display: flex;
+    }
+    .nav-link {
+      padding: 0.75rem 0.85rem;
+      font-size: 0.95rem;
+    }
+  }
+</style>
+
+<script>
+  const toggle = document.getElementById("menu-toggle") as HTMLButtonElement | null;
+  const nav = document.getElementById("nav-links");
+
+  if (toggle && nav) {
+    toggle.addEventListener("click", () => {
+      const isOpen = nav.classList.toggle("open");
+      toggle.setAttribute("aria-expanded", String(isOpen));
+      toggle.setAttribute("aria-label", isOpen ? "Cerrar menú" : "Abrir menú");
+    });
+
+    // Cerrar al elegir una página, o si la ventana crece a tamaño de escritorio.
+    nav.addEventListener("click", (e) => {
+      if ((e.target as HTMLElement).closest(".nav-link")) {
+        nav.classList.remove("open");
+        toggle.setAttribute("aria-expanded", "false");
+        toggle.setAttribute("aria-label", "Abrir menú");
+      }
+    });
+
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 899 && nav.classList.contains("open")) {
+        nav.classList.remove("open");
+        toggle.setAttribute("aria-expanded", "false");
+        toggle.setAttribute("aria-label", "Abrir menú");
+      }
+    });
+  }
+</script>

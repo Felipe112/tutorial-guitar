@@ -1,0 +1,41 @@
+---
+import { FINGER_COLORS, FINGER_NAMES } from "@/lib/fingerColors";
+const fingers = [1, 2, 3, 4];
+---
+
+<div class="finger-legend">
+  {fingers.map((f) => (
+    <span class="legend-item">
+      <span class="legend-dot" style={`background: ${FINGER_COLORS[f]};`}>{f}</span>
+      {FINGER_NAMES[f]}
+    </span>
+  ))}
+</div>
+
+<style>
+  .finger-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+    align-items: center;
+    font-size: 0.82rem;
+    color: #475569;
+    margin-bottom: 1rem;
+  }
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .legend-dot {
+    width: 1.2rem;
+    height: 1.2rem;
+    border-radius: 999px;
+    color: white;
+    font-weight: 800;
+    font-size: 0.68rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>

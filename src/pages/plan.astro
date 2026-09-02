@@ -1,0 +1,261 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import CompleteToggle from "@/components/CompleteToggle.astro";
+import { weeklyPlan, buildExtendedPlan } from "@/data/weeklyPlan";
+
+const plans = [
+  { id: "semanal", label: "Semanal (7 días)", days: weeklyPlan, mode: "weekday" as const },
+  { id: "quincenal", label: "Quincenal (15 días)", days: buildExtendedPlan(15, "quincenal"), mode: "cycle15" as const },
+  { id: "mensual", label: "Mensual (30 días)", days: buildExtendedPlan(30, "mensual"), mode: "cycle30" as const },
+];
+---
+
+<Layout title="Planes" description="Rutina de práctica de guitarra semanal, quincenal o mensual: calentamiento, ejercicios clave y un hábito diario fijo.">
+  <h1 class="page-title">Planes de entrenamiento</h1>
+  <p class="page-lead">
+    Cada día tiene: un <strong>calentamiento</strong> (2-3 min), <strong>2 ejercicios clave</strong> del tema del día, un ejercicio que se repite <strong>todos los días</strong> porque es el que más rápido te hace mejorar,
+    y <strong>2 opcionales</strong> de la sección de géneros musicales, por si quieres sumar más práctica.
+    Elige cuánto quieres comprometerte:
+  </p>
+
+  <div class="plan-tabs" role="tablist">
+    {plans.map((p, i) => (
+      <button
+        type="button"
+        class:list={["plan-tab", { active: i === 0 }]}
+        data-plan-tab={p.id}
+        role="tab"
+        aria-selected={i === 0}
+      >
+        {p.label}
+      </button>
+    ))}
+  </div>
+
+  {plans.map((p, i) => (
+    <div class:list={["plan-set", { active: i === 0 }]} data-plan-set={p.id}>
+      <div class="plan-grid">
+        {p.days.map((d) => (
+          <article
+            class="day-card"
+            data-day={d.weekdayKey}
+            data-day-number={d.dayNumber ?? ""}
+            data-plan-mode={p.mode}
+          >
+            <div class="day-head">
+              <span class="day-name">{d.day}</span>
+              <span class="day-today-badge">Hoy</span>
+            </div>
+            <h3>{d.focus}</h3>
+            <span class="minutes-badge">~{d.minutes} min</span>
+
+            <div class="plan-block">
+              <span class="block-label">🔥 Calentamiento</span>
+              <a href={d.warmup.href}>{d.warmup.label}</a>
+            </div>
+
+            <div class="plan-block">
+              <span class="block-label">🎯 Ejercicios clave</span>
+              <ul>
+                {d.keyItems.map((item) => (
+                  <li><a href={item.href}>{item.label}</a></li>
+                ))}
+              </ul>
+            </div>
+
+            <div class="plan-block always-block">
+              <span class="block-label">⭐ Siempre</span>
+              <a href={d.alwaysDo.href}>{d.alwaysDo.label}</a>
+            </div>
+
+            <div class="plan-block optional-block">
+              <span class="block-label">Opcionales</span>
+              <ul>
+                {d.optionalItems.map((item) => (
+                  <li><a href={item.href}>{item.icon && <span class="genre-icon">{item.icon}</span>} {item.label}</a></li>
+                ))}
+              </ul>
+            </div>
+
+            <CompleteToggle id={`plan:${d.key}`} label="Marcar día como hecho" />
+          </article>
+        ))}
+      </div>
+    </div>
+  ))}
+</Layout>
+
+<style>
+  .plan-tabs {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+  .plan-tab {
+    background: white;
+    border: 1.5px solid #cbd5e1;
+    color: #475569;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .plan-tab.active {
+    background: #0f172a;
+    border-color: #0f172a;
+    color: white;
+  }
+  .plan-set {
+    display: none;
+  }
+  .plan-set.active {
+    display: block;
+  }
+  .plan-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+    gap: 1rem;
+  }
+  .day-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.9rem;
+    padding: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    position: relative;
+    min-width: 0;
+  }
+  .day-card.is-today {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 2px #fde68a;
+  }
+  .day-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .day-name {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #94a3b8;
+  }
+  .day-today-badge {
+    display: none;
+    background: #f59e0b;
+    color: #1e293b;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+  }
+  .day-card.is-today .day-today-badge {
+    display: inline-block;
+  }
+  .day-card h3 {
+    margin: 0;
+    font-size: 1.15rem;
+  }
+  .minutes-badge {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 600;
+    margin-top: -0.35rem;
+  }
+  .plan-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .block-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  .plan-block a {
+    color: #0f766e;
+    font-weight: 600;
+    font-size: 0.88rem;
+    text-decoration: none;
+  }
+  .plan-block a:hover {
+    text-decoration: underline;
+  }
+  .plan-block ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    display: grid;
+    gap: 0.2rem;
+  }
+  .always-block {
+    background: #fffbeb;
+    border: 1px dashed #f59e0b;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.65rem;
+  }
+  .optional-block {
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.65rem;
+  }
+  .optional-block .block-label {
+    color: #64748b;
+  }
+</style>
+
+<script>
+  import { getSelectedPlan, setSelectedPlan } from "@/lib/storage";
+
+  const dayKeyByIndex = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"];
+  const today = new Date();
+  const todayWeekdayKey = dayKeyByIndex[today.getDay()];
+  const todayDayOfMonth = today.getDate(); // 1..31
+  const todayQuincenalDay = ((todayDayOfMonth - 1) % 15) + 1; // 1..15, se repite cada quincena
+
+  document.querySelectorAll<HTMLElement>(".day-card").forEach((card) => {
+    const mode = card.dataset.planMode;
+    const dayNumber = Number(card.dataset.dayNumber);
+    const isToday =
+      (mode === "weekday" && card.dataset.day === todayWeekdayKey) ||
+      (mode === "cycle15" && dayNumber === todayQuincenalDay) ||
+      (mode === "cycle30" && dayNumber === todayDayOfMonth);
+    if (isToday) {
+      card.classList.add("is-today");
+    }
+  });
+
+  const tabs = document.querySelectorAll<HTMLButtonElement>(".plan-tab");
+  const sets = document.querySelectorAll<HTMLElement>(".plan-set");
+
+  function activate(planId: string) {
+    tabs.forEach((t) => {
+      const isActive = t.dataset.planTab === planId;
+      t.classList.toggle("active", isActive);
+      t.setAttribute("aria-selected", String(isActive));
+    });
+    sets.forEach((s) => {
+      s.classList.toggle("active", s.dataset.planSet === planId);
+    });
+  }
+
+  // Recupera el plan que el usuario eligió la última vez (por defecto: semanal).
+  activate(getSelectedPlan());
+
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const target = tab.dataset.planTab;
+      if (!target) return;
+      activate(target);
+      setSelectedPlan(target as "semanal" | "quincenal" | "mensual");
+    });
+  });
+</script>

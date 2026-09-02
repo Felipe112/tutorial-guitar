@@ -1,0 +1,159 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import TabPlayer from "@/components/TabPlayer.astro";
+import { melodies, type Melody } from "@/data/melodies";
+
+const levels: { id: Melody["level"]; label: string }[] = [
+  { id: "principiante", label: "Principiante" },
+  { id: "medio", label: "Medio" },
+  { id: "avanzado", label: "Avanzado" },
+];
+---
+
+<Layout title="Melodías" description="30 melodías para guitarra en tres niveles (principiante, medio, avanzado) con tablatura interactiva y reproducción de audio.">
+  <h1 class="page-title">Primeras melodías</h1>
+  <p class="page-lead">
+    Empieza escuchando la melodía completa, luego tócala tú mismo comparando con el audio.
+  </p>
+
+  <div class="level-filters" role="tablist">
+    <button type="button" class="filter-pill active" data-filter="todas" role="tab" aria-selected="true">
+      Todas
+    </button>
+    {levels.map((lvl) => (
+      <button type="button" class:list={["filter-pill", lvl.id]} data-filter={lvl.id} role="tab" aria-selected="false">
+        {lvl.label}
+      </button>
+    ))}
+  </div>
+
+  {levels.map((lvl) => (
+    <section class="level-section" data-level={lvl.id}>
+      <h2 class="level-title">{lvl.label}</h2>
+      <div class="mel-list">
+        {melodies.filter((m) => m.level === lvl.id).map((m) => (
+          <article class="mel-card" id={m.id}>
+            <div class="mel-head">
+              <h3>{m.title}</h3>
+              <span class:list={["level-badge", m.level]}>{m.level}</span>
+            </div>
+            <TabPlayer notes={m.notes} bpm={m.bpm} />
+          </article>
+        ))}
+      </div>
+    </section>
+  ))}
+</Layout>
+
+<style>
+  .level-filters {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.75rem;
+  }
+  .filter-pill {
+    background: white;
+    border: 1.5px solid #cbd5e1;
+    color: #475569;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 0.45rem 1rem;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .filter-pill.active {
+    background: #0f172a;
+    border-color: #0f172a;
+    color: white;
+  }
+  .filter-pill.principiante.active {
+    background: #dcfce7;
+    border-color: #166534;
+    color: #166534;
+  }
+  .filter-pill.medio.active {
+    background: #fef3c7;
+    border-color: #92400e;
+    color: #92400e;
+  }
+  .filter-pill.avanzado.active {
+    background: #fee2e2;
+    border-color: #b91c1c;
+    color: #b91c1c;
+  }
+  .level-section {
+    margin-top: 2rem;
+  }
+  .level-section:first-of-type {
+    margin-top: 0;
+  }
+  .level-section.level-hidden {
+    display: none;
+  }
+  .level-title {
+    margin-bottom: 1rem;
+  }
+  .mel-list {
+    display: grid;
+    gap: 1.25rem;
+  }
+  .mel-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.9rem;
+    padding: 1.25rem;
+    display: grid;
+    gap: 0.6rem;
+    min-width: 0;
+  }
+  .mel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .mel-head h3 {
+    margin: 0;
+  }
+  .level-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .level-badge.principiante {
+    background: #dcfce7;
+    color: #166534;
+  }
+  .level-badge.medio {
+    background: #fef3c7;
+    color: #92400e;
+  }
+  .level-badge.avanzado {
+    background: #fee2e2;
+    color: #b91c1c;
+  }
+</style>
+
+<script>
+  const pills = document.querySelectorAll<HTMLButtonElement>(".filter-pill");
+  const sections = document.querySelectorAll<HTMLElement>(".level-section");
+
+  pills.forEach((pill) => {
+    pill.addEventListener("click", () => {
+      const target = pill.dataset.filter;
+      pills.forEach((p) => {
+        const isActive = p === pill;
+        p.classList.toggle("active", isActive);
+        p.setAttribute("aria-selected", String(isActive));
+      });
+      sections.forEach((s) => {
+        const show = target === "todas" || s.dataset.level === target;
+        s.classList.toggle("level-hidden", !show);
+      });
+    });
+  });
+</script>

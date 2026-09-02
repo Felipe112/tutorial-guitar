@@ -1,0 +1,174 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { challenges, challengeForDate } from "@/data/challenges";
+
+const today = challengeForDate(new Date());
+const todayLabel = new Date().toLocaleDateString("es-ES", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+});
+---
+
+<Layout title="Retos diarios" description="Un reto de guitarra distinto cada día para mantener la práctica constante y construir una racha.">
+  <h1 class="page-title">Retos diarios</h1>
+  <p class="page-lead">Un reto nuevo cada día. Complétalo y súmalo a tu racha.</p>
+
+  <section class="today-card">
+    <span class="today-date" id="today-date">{todayLabel}</span>
+    <span class="today-category" id="today-category">{today.category}</span>
+    <h2 id="today-title">{today.title}</h2>
+    <p id="today-description">{today.description}</p>
+    <button type="button" id="today-done-btn" data-id={today.id}>Marcar reto de hoy como hecho</button>
+    <p class="streak-line">🔥 Racha actual: <strong id="streak-count">0</strong> día(s)</p>
+  </section>
+
+  <h2 class="section-title">Todos los retos</h2>
+  <p class="lead-small">Cuando quieras práctica extra, elige cualquiera de estos.</p>
+  <div class="challenge-grid">
+    {challenges.map((c) => (
+      <article class="challenge-card">
+        <span class="badge">{c.category}</span>
+        <h3>{c.title}</h3>
+        <p>{c.description}</p>
+      </article>
+    ))}
+  </div>
+</Layout>
+
+<style>
+  .lead-small {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin-top: -0.5rem;
+  }
+  .today-card {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: white;
+    border-radius: 1rem;
+    padding: 1.75rem;
+    margin: 1.25rem 0 2rem;
+    max-width: 34rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .today-date {
+    text-transform: capitalize;
+    color: #94a3b8;
+    font-size: 0.8rem;
+  }
+  .today-category {
+    color: #f59e0b;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .today-card h2 {
+    margin: 0.25rem 0;
+  }
+  .today-card p {
+    color: #cbd5e1;
+    margin: 0 0 0.75rem;
+  }
+  #today-done-btn {
+    align-self: flex-start;
+    background: #f59e0b;
+    color: #1e293b;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.6rem 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  #today-done-btn.done {
+    background: #10b981;
+    color: white;
+  }
+  .streak-line {
+    margin-top: 0.5rem;
+    color: #f1f5f9;
+  }
+  .section-title {
+    margin-top: 1rem;
+  }
+  .challenge-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: 0.85rem;
+    margin-top: 1rem;
+  }
+  .challenge-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    min-width: 0;
+  }
+  .challenge-card h3 {
+    margin: 0.4rem 0 0.3rem;
+    font-size: 1rem;
+  }
+  .challenge-card p {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0;
+  }
+  .badge {
+    background: #fee2e2;
+    color: #b91c1c;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+  }
+</style>
+
+<script>
+  import { currentStreak, isChallengeDoneToday, markChallengeDone } from "@/lib/storage";
+  import { challengeForDate } from "@/data/challenges";
+
+  const btn = document.getElementById("today-done-btn") as HTMLButtonElement | null;
+  const streakEl = document.getElementById("streak-count");
+
+  // La página puede haber sido generada (build estático) en un día distinto
+  // al que se está viendo: recalculamos el reto de hoy en el navegador para
+  // que siempre esté al día sin necesitar un redeploy.
+  const now = new Date();
+  const freshChallenge = challengeForDate(now);
+  const dateEl = document.getElementById("today-date");
+  const categoryEl = document.getElementById("today-category");
+  const titleEl = document.getElementById("today-title");
+  const descriptionEl = document.getElementById("today-description");
+
+  if (dateEl) {
+    dateEl.textContent = now.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" });
+  }
+  if (categoryEl) categoryEl.textContent = freshChallenge.category;
+  if (titleEl) titleEl.textContent = freshChallenge.title;
+  if (descriptionEl) descriptionEl.textContent = freshChallenge.description;
+  if (btn) btn.dataset.id = freshChallenge.id;
+
+  function renderStreak() {
+    if (streakEl) streakEl.textContent = String(currentStreak());
+  }
+
+  function renderButton() {
+    if (!btn) return;
+    const done = isChallengeDoneToday();
+    btn.textContent = done ? "¡Reto de hoy completado!" : "Marcar reto de hoy como hecho";
+    btn.classList.toggle("done", done);
+    btn.disabled = done;
+  }
+
+  renderStreak();
+  renderButton();
+
+  btn?.addEventListener("click", () => {
+    markChallengeDone(btn.dataset.id ?? "");
+    renderButton();
+    renderStreak();
+  });
+</script>
