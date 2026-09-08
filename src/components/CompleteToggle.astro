@@ -18,8 +18,8 @@ const { id, label = "Marcar como hecho" } = Astro.props;
     gap: 0.4rem;
     padding: 0.4rem 0.85rem;
     border-radius: 999px;
-    border: 1.5px solid #cbd5e1;
-    background: white;
+    border: 1.5px solid var(--border-strong);
+    background: var(--surface);
     color: #475569;
     font-size: 0.8rem;
     font-weight: 600;
@@ -35,6 +35,12 @@ const { id, label = "Marcar como hecho" } = Astro.props;
   }
   .complete-toggle.done .check-icon {
     opacity: 1;
+  }
+  /* En pantallas táctiles chicas, agranda un poco el área de toque. */
+  @media (max-width: 640px) {
+    .complete-toggle {
+      padding: 0.55rem 0.85rem;
+    }
   }
 </style>
 

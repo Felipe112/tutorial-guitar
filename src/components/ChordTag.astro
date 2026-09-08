@@ -18,11 +18,11 @@ const chord = chordById(chordId);
   .chord-tag {
     display: inline-flex;
     align-items: center;
-    background: #f1f5f9;
+    background: var(--bg);
     color: #0f766e;
     font-weight: 700;
     font-size: 0.8rem;
-    border: 1.5px solid #cbd5e1;
+    border: 1.5px solid var(--border-strong);
     border-radius: 999px;
     padding: 0.15rem 0.6rem;
     cursor: pointer;
@@ -40,8 +40,8 @@ const chord = chordById(chordId);
   .chord-tooltip {
     position: absolute;
     z-index: 100;
-    background: white;
-    border: 1px solid #e2e8f0;
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 0.6rem;
     padding: 0.65rem 0.75rem;
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
@@ -92,7 +92,7 @@ const chord = chordById(chordId);
   }
   .chord-tooltip .ct-row {
     height: 1.2rem;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--border);
     position: relative;
   }
   .chord-tooltip .ct-cell {

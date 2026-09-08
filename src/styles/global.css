@@ -1,1 +1,10 @@
 @import "tailwindcss";
+
+/* Paleta base del sitio: azul cielo suave, sin blancos. Un solo lugar para
+   ajustar el tono de fondo/tarjetas/bordes en toda la app. */
+:root {
+  --bg: #e9f1fb; /* fondo de página y paneles "hundidos" (chips, recuadros anidados) */
+  --surface: #f4f9fd; /* fondo de tarjetas y píldoras */
+  --border: #cfe2f3; /* borde de tarjetas */
+  --border-strong: #b7d3ea; /* borde de píldoras/botones/inputs interactivos */
+}

@@ -55,12 +55,22 @@ const initialLabel = `${String(minutes).padStart(2, "0")}:00`;
     width: 1.9rem;
     height: 1.9rem;
     border-radius: 999px;
-    border: 1.5px solid #cbd5e1;
-    background: white;
+    border: 1.5px solid var(--border-strong);
+    background: var(--surface);
     color: #475569;
     font-size: 1rem;
     line-height: 1;
     cursor: pointer;
+  }
+  /* En pantallas táctiles chicas, agranda un poco el área de toque de los botones. */
+  @media (max-width: 640px) {
+    .timer-btn {
+      padding: 0.55rem 0.9rem;
+    }
+    .timer-reset {
+      width: 2.4rem;
+      height: 2.4rem;
+    }
   }
   .timer-reset:hover {
     border-color: #94a3b8;
