@@ -1,0 +1,202 @@
+---
+interface Props {
+  id: string; // id completo, ej. "exercises:ex-01"
+  minutes: number;
+}
+const { id, minutes } = Astro.props;
+const initialLabel = `${String(minutes).padStart(2, "0")}:00`;
+---
+
+<div class="ex-timer" data-id={id} data-minutes={minutes}>
+  <button type="button" class="timer-btn">
+    <span class="timer-icon">▶</span>
+    <span class="timer-time">{initialLabel}</span>
+  </button>
+  <button type="button" class="timer-reset" title="Reiniciar temporizador" hidden>↺</button>
+</div>
+
+<style>
+  .ex-timer {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .timer-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    border: 1.5px solid #f59e0b;
+    background: #fffbeb;
+    color: #92400e;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+  }
+  .timer-btn.running {
+    background: #f59e0b;
+    color: white;
+  }
+  .timer-btn.done {
+    background: #ecfdf5;
+    border-color: #10b981;
+    color: #047857;
+  }
+  .timer-icon {
+    font-size: 0.9rem;
+    line-height: 1;
+  }
+  .timer-reset {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 999px;
+    border: 1.5px solid var(--border-strong);
+    background: var(--surface);
+    color: #475569;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  /* En pantallas táctiles chicas, agranda un poco el área de toque de los botones. */
+  @media (max-width: 640px) {
+    .timer-btn {
+      padding: 0.55rem 0.9rem;
+    }
+    .timer-reset {
+      width: 2.4rem;
+      height: 2.4rem;
+    }
+  }
+  .timer-reset:hover {
+    border-color: #94a3b8;
+    color: #1e293b;
+  }
+</style>
+
+<script>
+  import { isCompleted, setCompleted } from "@/lib/storage";
+  import { playClick, unlockAudio } from "@/lib/audio";
+
+  type TimerState = "idle" | "running" | "paused" | "done";
+
+  function format(totalSeconds: number): string {
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
+    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  }
+
+  /** Cablea un temporizador de práctica: play/pausa, cuenta regresiva y auto-completado al llegar a 0. */
+  function initTimer(root: HTMLElement) {
+    const id = root.dataset.id!;
+    const totalSeconds = (Number(root.dataset.minutes) || 1) * 60;
+    const btn = root.querySelector<HTMLButtonElement>(".timer-btn")!;
+    const icon = btn.querySelector<HTMLElement>(".timer-icon")!;
+    const timeEl = btn.querySelector<HTMLElement>(".timer-time")!;
+    const resetBtn = root.querySelector<HTMLButtonElement>(".timer-reset")!;
+
+    let remaining = totalSeconds;
+    let intervalId: number | undefined;
+    let state: TimerState = isCompleted(id) ? "done" : "idle";
+    if (state === "done") remaining = 0;
+
+    /** Pinta el botón y el reset según el estado actual (idle/running/paused/done). */
+    function render() {
+      btn.classList.toggle("running", state === "running");
+      btn.classList.toggle("done", state === "done");
+      if (state === "done") {
+        icon.textContent = "✓";
+        timeEl.textContent = "¡Hecho! Repetir";
+      } else {
+        icon.textContent = state === "running" ? "⏸" : "▶";
+        timeEl.textContent = format(remaining);
+      }
+      resetBtn.hidden = state === "idle" && remaining === totalSeconds;
+    }
+
+    /** Resta un segundo cada intervalo; dispara `finish()` al llegar a 0. */
+    function tick() {
+      remaining -= 1;
+      if (remaining <= 0) {
+        finish();
+        return;
+      }
+      render();
+    }
+
+    /** Arranca (o reanuda) la cuenta regresiva de un segundo en segundo. */
+    function start() {
+      unlockAudio();
+      state = "running";
+      intervalId = window.setInterval(tick, 1000);
+      render();
+    }
+
+    /** Detiene el interval sin perder el tiempo restante. */
+    function pause() {
+      state = "paused";
+      if (intervalId) window.clearInterval(intervalId);
+      render();
+    }
+
+    /** Llegó a 0: marca el item como hecho, suena un beep y avisa a los demás controles. */
+    function finish() {
+      state = "done";
+      remaining = 0;
+      if (intervalId) window.clearInterval(intervalId);
+      setCompleted(id, true);
+      playClick(true);
+      window.setTimeout(() => playClick(true), 180);
+      render();
+      root.dispatchEvent(new CustomEvent("tg:progress-change", { bubbles: true, detail: { id } }));
+    }
+
+    /** Vuelve al tiempo completo sin arrancar; no toca el estado de "hecho" guardado. */
+    function resetTimer() {
+      if (intervalId) window.clearInterval(intervalId);
+      state = "idle";
+      remaining = totalSeconds;
+      render();
+    }
+
+    render();
+
+    btn.addEventListener("click", () => {
+      if (state === "running") {
+        pause();
+      } else if (state === "done") {
+        remaining = totalSeconds;
+        start();
+      } else {
+        start();
+      }
+    });
+
+    resetBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      resetTimer();
+    });
+
+    // Sincroniza si el estado cambió desde otro control (ej. el botón "Marcar como hecho").
+    document.addEventListener("tg:progress-change", ((e: CustomEvent<{ id: string }>) => {
+      if (e.detail?.id !== id) return;
+      const done = isCompleted(id);
+      if (done && state !== "done") {
+        if (intervalId) window.clearInterval(intervalId);
+        state = "done";
+        remaining = 0;
+        render();
+      } else if (!done && state === "done") {
+        state = "idle";
+        remaining = totalSeconds;
+        render();
+      }
+    }) as EventListener);
+  }
+
+  document.querySelectorAll<HTMLElement>(".ex-timer").forEach(initTimer);
+</script>

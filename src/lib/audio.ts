@@ -3,6 +3,7 @@
 
 let ctx: AudioContext | null = null;
 
+/** Devuelve el AudioContext compartido, creándolo o reanudándolo si hace falta. */
 function getCtx(): AudioContext {
   if (!ctx) {
     ctx = new AudioContext();
@@ -73,6 +74,7 @@ export function fretToNote(stringIndex: number, fret: number): { note: NoteName;
   return semitoneToNote(semitone);
 }
 
+/** Frecuencia en Hz al pisar `fret` en la cuerda `stringIndex`. */
 export function fretToFrequency(stringIndex: number, fret: number): number {
   const { note, octave } = fretToNote(stringIndex, fret);
   return noteToFrequency(note, octave);
@@ -132,6 +134,7 @@ export function playClick(accent: boolean): void {
   osc.stop(now + 0.06);
 }
 
+/** Crea/reanuda el AudioContext dentro de un gesto de usuario (requisito de los navegadores). */
 export function unlockAudio(): void {
   getCtx();
 }

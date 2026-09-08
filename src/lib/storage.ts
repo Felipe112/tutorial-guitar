@@ -7,6 +7,7 @@ const KEYS = {
   selectedPlan: "tg:selected-plan", // "semanal" | "quincenal" | "mensual"
 } as const;
 
+/** Lee y parsea un valor JSON de localStorage; devuelve `fallback` si no existe o falla. */
 function readJSON<T>(key: string, fallback: T): T {
   if (typeof localStorage === "undefined") return fallback;
   try {
@@ -17,16 +18,30 @@ function readJSON<T>(key: string, fallback: T): T {
   }
 }
 
+/** Serializa `value` como JSON y lo guarda en localStorage. */
 function writeJSON(key: string, value: unknown): void {
   if (typeof localStorage === "undefined") return;
   localStorage.setItem(key, JSON.stringify(value));
 }
 
+/** ¿Está este item ("seccion:itemId") marcado como hecho? */
 export function isCompleted(id: string): boolean {
   const set = readJSON<string[]>(KEYS.completedItems, []);
   return set.includes(id);
 }
 
+/** Marca o desmarca explícitamente un item como hecho (sin alternar). */
+export function setCompleted(id: string, done: boolean): void {
+  const set = new Set(readJSON<string[]>(KEYS.completedItems, []));
+  if (done) {
+    set.add(id);
+  } else {
+    set.delete(id);
+  }
+  writeJSON(KEYS.completedItems, [...set]);
+}
+
+/** Alterna el estado hecho/no-hecho de un item y devuelve el nuevo valor. */
 export function toggleCompleted(id: string): boolean {
   const set = new Set(readJSON<string[]>(KEYS.completedItems, []));
   let nowDone: boolean;
@@ -41,11 +56,13 @@ export function toggleCompleted(id: string): boolean {
   return nowDone;
 }
 
+/** Cuántos items hechos tienen un id que empieza con `prefix` (ej. "exercises:"). */
 export function countCompletedByPrefix(prefix: string): number {
   const set = readJSON<string[]>(KEYS.completedItems, []);
   return set.filter((id) => id.startsWith(prefix)).length;
 }
 
+/** Total de items marcados como hechos en todo el sitio. */
 export function totalCompleted(): number {
   return readJSON<string[]>(KEYS.completedItems, []).length;
 }
@@ -64,21 +81,25 @@ export function getSelectedPlan(): PlanId {
   return value === "quincenal" || value === "mensual" ? value : "semanal";
 }
 
+/** Guarda el plan elegido en /plan para recordarlo en la próxima visita. */
 export function setSelectedPlan(plan: PlanId): void {
   if (typeof localStorage === "undefined") return;
   localStorage.setItem(KEYS.selectedPlan, plan);
 }
 
+/** Fecha de hoy en formato ISO corto (YYYY-MM-DD), clave del log de retos. */
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+/** Registra el reto de hoy como completado (sobreescribe si ya había uno). */
 export function markChallengeDone(challengeId: string): void {
   const log = readJSON<Record<string, string>>(KEYS.challengeLog, {});
   log[todayIso()] = challengeId;
   writeJSON(KEYS.challengeLog, log);
 }
 
+/** ¿Ya se completó el reto diario de hoy? */
 export function isChallengeDoneToday(): boolean {
   const log = readJSON<Record<string, string>>(KEYS.challengeLog, {});
   return todayIso() in log;

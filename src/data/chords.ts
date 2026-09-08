@@ -754,6 +754,7 @@ export const chordAlternatives: ChordShape[] = [
   },
 ];
 
+/** Busca un acorde por id entre las formas principales y sus alternativas. */
 export function chordById(id: string): ChordShape | undefined {
   return chords.find((c) => c.id === id) ?? chordAlternatives.find((c) => c.id === id);
 }

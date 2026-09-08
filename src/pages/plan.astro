@@ -93,8 +93,8 @@ const plans = [
     margin-bottom: 1.5rem;
   }
   .plan-tab {
-    background: white;
-    border: 1.5px solid #cbd5e1;
+    background: var(--surface);
+    border: 1.5px solid var(--border-strong);
     color: #475569;
     font-weight: 600;
     font-size: 0.85rem;
@@ -119,8 +119,8 @@ const plans = [
     gap: 1rem;
   }
   .day-card {
-    background: white;
-    border: 1px solid #e2e8f0;
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 0.9rem;
     padding: 1.1rem;
     display: flex;
@@ -202,8 +202,8 @@ const plans = [
     padding: 0.5rem 0.65rem;
   }
   .optional-block {
-    background: #f8fafc;
-    border: 1px dashed #cbd5e1;
+    background: var(--bg);
+    border: 1px dashed var(--border-strong);
     border-radius: 0.5rem;
     padding: 0.5rem 0.65rem;
   }
@@ -236,6 +236,7 @@ const plans = [
   const tabs = document.querySelectorAll<HTMLButtonElement>(".plan-tab");
   const sets = document.querySelectorAll<HTMLElement>(".plan-set");
 
+  /** Muestra el set de días del plan elegido y resalta su pestaña. */
   function activate(planId: string) {
     tabs.forEach((t) => {
       const isActive = t.dataset.planTab === planId;

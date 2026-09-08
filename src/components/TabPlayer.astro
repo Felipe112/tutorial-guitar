@@ -178,6 +178,7 @@ const stringLabel = ["1ra", "2da", "3ra", "4ta", "5ta", "6ta"];
     beats?: number;
   }
 
+  /** Cablea un bloque de tablatura: agrupa celdas por paso y engancha el botón de reproducir. */
   function initTabPlayer(root: HTMLElement) {
     const notes = JSON.parse(root.dataset.notes ?? "[]") as NoteStep[];
     const bpm = Number(root.dataset.bpm ?? 90);
@@ -205,6 +206,7 @@ const stringLabel = ["1ra", "2da", "3ra", "4ta", "5ta", "6ta"];
       clearActive();
     }
 
+    /** Reproduce la tablatura nota por nota, resaltando el paso activo y sonando cada traste. */
     function play() {
       unlockAudio();
       playing = true;
