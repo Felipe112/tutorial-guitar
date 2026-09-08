@@ -188,6 +188,7 @@ export const challenges: Challenge[] = [
   },
 ];
 
+/** Hash simple y determinístico de un string a un entero positivo (para elegir el reto del día). */
 function hashStringToInt(value: string): number {
   let hash = 0;
   for (let i = 0; i < value.length; i++) {

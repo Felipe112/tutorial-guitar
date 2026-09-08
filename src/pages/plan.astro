@@ -236,6 +236,7 @@ const plans = [
   const tabs = document.querySelectorAll<HTMLButtonElement>(".plan-tab");
   const sets = document.querySelectorAll<HTMLElement>(".plan-set");
 
+  /** Muestra el set de días del plan elegido y resalta su pestaña. */
   function activate(planId: string) {
     tabs.forEach((t) => {
       const isActive = t.dataset.planTab === planId;

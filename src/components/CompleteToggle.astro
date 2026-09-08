@@ -41,6 +41,7 @@ const { id, label = "Marcar como hecho" } = Astro.props;
 <script>
   import { isCompleted, toggleCompleted } from "@/lib/storage";
 
+  /** Cablea el botón "Marcar como hecho": alterna el progreso y se mantiene sincronizado. */
   function initToggle(btn: HTMLButtonElement) {
     const id = btn.dataset.id!;
     const text = btn.querySelector(".check-text")!;
@@ -57,8 +58,14 @@ const { id, label = "Marcar como hecho" } = Astro.props;
     btn.addEventListener("click", () => {
       const nowDone = toggleCompleted(id);
       render(nowDone);
-      btn.dispatchEvent(new CustomEvent("tg:progress-change", { bubbles: true }));
+      btn.dispatchEvent(new CustomEvent("tg:progress-change", { bubbles: true, detail: { id } }));
     });
+
+    // Sincroniza si el estado cambió desde otro control (ej. el temporizador).
+    document.addEventListener("tg:progress-change", ((e: CustomEvent<{ id: string }>) => {
+      if (e.detail?.id !== id) return;
+      render(isCompleted(id));
+    }) as EventListener);
   }
 
   document.querySelectorAll<HTMLButtonElement>(".complete-toggle").forEach(initToggle);

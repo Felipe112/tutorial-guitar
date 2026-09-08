@@ -15,6 +15,7 @@ export const FINGER_NAMES: Record<number, string> = {
   4: "meñique",
 };
 
+/** Color para un dedo dado; ámbar por defecto si no hay dedo asignado (ej. cuerda al aire). */
 export function fingerColor(finger: number | null | undefined): string {
   if (!finger) return "#f59e0b";
   return FINGER_COLORS[finger] ?? "#f59e0b";

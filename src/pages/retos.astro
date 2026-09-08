@@ -151,10 +151,12 @@ const todayLabel = new Date().toLocaleDateString("es-ES", {
   if (descriptionEl) descriptionEl.textContent = freshChallenge.description;
   if (btn) btn.dataset.id = freshChallenge.id;
 
+  /** Actualiza el contador de racha en pantalla. */
   function renderStreak() {
     if (streakEl) streakEl.textContent = String(currentStreak());
   }
 
+  /** Pinta el botón de reto según si ya se completó hoy (texto, estilo y disabled). */
   function renderButton() {
     if (!btn) return;
     const done = isChallengeDoneToday();

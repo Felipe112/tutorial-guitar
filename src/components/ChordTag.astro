@@ -145,6 +145,7 @@ const chord = chordById(chordId);
   import type { ChordShape } from "@/data/chords";
   import { fingerColor } from "@/lib/fingerColors";
 
+  /** Obtiene el tooltip global compartido, creándolo en el DOM si no existe todavía. */
   function ensureTooltip(): HTMLElement {
     let el = document.getElementById("chord-tooltip-global");
     if (!el) {
@@ -157,6 +158,7 @@ const chord = chordById(chordId);
     return el;
   }
 
+  /** Genera el HTML del mini-diagrama de acorde que se muestra dentro del tooltip. */
   function renderTooltipHTML(chord: ChordShape): string {
     const frets = 4;
     const baseFret = chord.baseFret ?? 1;
@@ -200,6 +202,7 @@ const chord = chordById(chordId);
     `;
   }
 
+  /** Posiciona el tooltip debajo del botón que lo abrió, ajustando si se sale por la derecha. */
   function positionTooltip(tooltip: HTMLElement, anchor: HTMLElement) {
     const rect = anchor.getBoundingClientRect();
     const top = rect.bottom + window.scrollY + 8;
@@ -219,6 +222,7 @@ const chord = chordById(chordId);
     document.getElementById("chord-tooltip-global")?.classList.remove("visible");
   }
 
+  /** Cablea un tag de acorde: tooltip en hover/foco, y "pin" (queda abierto) al hacer click. */
   function initTag(btn: HTMLButtonElement) {
     const chord = JSON.parse(btn.dataset.chord ?? "null") as ChordShape | null;
     if (!chord) return;
