@@ -36,49 +36,58 @@ const plans = [
     <div class:list={["plan-set", { active: i === 0 }]} data-plan-set={p.id}>
       <div class="plan-grid">
         {p.days.map((d) => (
-          <article
+          <details
             class="day-card"
+            id={`plan-${p.id}-${d.key}`}
             data-day={d.weekdayKey}
             data-day-number={d.dayNumber ?? ""}
             data-plan-mode={p.mode}
+            open
           >
-            <div class="day-head">
-              <span class="day-name">{d.day}</span>
-              <span class="day-today-badge">Hoy</span>
-            </div>
-            <h3>{d.focus}</h3>
-            <span class="minutes-badge">~{d.minutes} min</span>
+            <summary class="day-summary">
+              <div class="day-head">
+                <span class="day-name">{d.day}</span>
+                <span class="day-badges">
+                  <span class="day-today-badge">Hoy</span>
+                  <span class="done-badge">✓ Hecho</span>
+                </span>
+              </div>
+              <h3>{d.focus}</h3>
+              <span class="minutes-badge">~{d.minutes} min</span>
+            </summary>
 
-            <div class="plan-block">
-              <span class="block-label">🔥 Calentamiento</span>
-              <a href={d.warmup.href}>{d.warmup.label}</a>
-            </div>
+            <div class="day-body">
+              <div class="plan-block">
+                <span class="block-label">🔥 Calentamiento</span>
+                <a href={d.warmup.href}>{d.warmup.label}</a>
+              </div>
 
-            <div class="plan-block">
-              <span class="block-label">🎯 Ejercicios clave</span>
-              <ul>
-                {d.keyItems.map((item) => (
-                  <li><a href={item.href}>{item.label}</a></li>
-                ))}
-              </ul>
-            </div>
+              <div class="plan-block">
+                <span class="block-label">🎯 Ejercicios clave</span>
+                <ul>
+                  {d.keyItems.map((item) => (
+                    <li><a href={item.href}>{item.label}</a></li>
+                  ))}
+                </ul>
+              </div>
 
-            <div class="plan-block always-block">
-              <span class="block-label">⭐ Siempre</span>
-              <a href={d.alwaysDo.href}>{d.alwaysDo.label}</a>
-            </div>
+              <div class="plan-block always-block">
+                <span class="block-label">⭐ Siempre</span>
+                <a href={d.alwaysDo.href}>{d.alwaysDo.label}</a>
+              </div>
 
-            <div class="plan-block optional-block">
-              <span class="block-label">Opcionales</span>
-              <ul>
-                {d.optionalItems.map((item) => (
-                  <li><a href={item.href}>{item.icon && <span class="genre-icon">{item.icon}</span>} {item.label}</a></li>
-                ))}
-              </ul>
-            </div>
+              <div class="plan-block optional-block">
+                <span class="block-label">Opcionales</span>
+                <ul>
+                  {d.optionalItems.map((item) => (
+                    <li><a href={item.href}>{item.icon && <span class="genre-icon">{item.icon}</span>} {item.label}</a></li>
+                  ))}
+                </ul>
+              </div>
 
-            <CompleteToggle id={`plan:${d.key}`} label="Marcar día como hecho" />
-          </article>
+              <CompleteToggle id={`plan:${d.key}`} label="Marcar día como hecho" />
+            </div>
+          </details>
         ))}
       </div>
     </div>
@@ -128,10 +137,25 @@ const plans = [
     gap: 0.6rem;
     position: relative;
     min-width: 0;
+    transition: border-color 0.1s ease, box-shadow 0.1s ease;
+  }
+  .day-card[open] {
+    border-color: #f59e0b;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
   }
   .day-card.is-today {
     border-color: #f59e0b;
     box-shadow: 0 0 0 2px #fde68a;
+  }
+  .day-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    cursor: pointer;
+    list-style: none;
+  }
+  .day-summary::-webkit-details-marker {
+    display: none;
   }
   .day-head {
     display: flex;
@@ -144,6 +168,11 @@ const plans = [
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: #94a3b8;
+  }
+  .day-badges {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
   }
   .day-today-badge {
     display: none;
@@ -158,6 +187,20 @@ const plans = [
   .day-card.is-today .day-today-badge {
     display: inline-block;
   }
+  .done-badge {
+    display: none;
+    align-items: center;
+    background: #dcfce7;
+    color: #166534;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .day-card.done:not([open]) .done-badge {
+    display: inline-flex;
+  }
   .day-card h3 {
     margin: 0;
     font-size: 1.15rem;
@@ -167,6 +210,15 @@ const plans = [
     color: #64748b;
     font-weight: 600;
     margin-top: -0.35rem;
+  }
+  .day-card:not([open]) .minutes-badge {
+    display: none;
+  }
+  .day-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 0.6rem;
   }
   .plan-block {
     display: flex;
@@ -213,7 +265,33 @@ const plans = [
 </style>
 
 <script>
-  import { getSelectedPlan, setSelectedPlan } from "@/lib/storage";
+  import { getSelectedPlan, setSelectedPlan, isCompleted } from "@/lib/storage";
+
+  /** Colapsa la tarjeta del día y marca "hecho" cuando se marca como completado. */
+  function initDayAccordion(details: HTMLDetailsElement) {
+    const toggleId = details.querySelector<HTMLButtonElement>(".complete-toggle")?.dataset.id;
+    if (!toggleId) return;
+
+    function sync() {
+      const done = isCompleted(toggleId!);
+      details.classList.toggle("done", done);
+      return done;
+    }
+
+    // Si ya estaba marcado como hecho en una visita anterior, arranca colapsado.
+    if (sync()) {
+      details.open = false;
+    }
+
+    details.addEventListener("tg:progress-change", () => {
+      const done = sync();
+      if (done) {
+        details.open = false;
+      }
+    });
+  }
+
+  document.querySelectorAll<HTMLDetailsElement>(".day-card").forEach(initDayAccordion);
 
   const dayKeyByIndex = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"];
   const today = new Date();
@@ -259,4 +337,15 @@ const plans = [
       setSelectedPlan(target as "semanal" | "quincenal" | "mensual");
     });
   });
+
+  // Sin hash en la URL, enfoca directo la clase del día de hoy: evita scroll manual
+  // cuando ya hay varios días cargados (útil sobre todo en móvil).
+  if (!window.location.hash) {
+    const todayCard = document.querySelector<HTMLElement>(".plan-set.active .day-card.is-today");
+    if (todayCard) {
+      todayCard.scrollIntoView({ block: "start", behavior: "smooth" });
+      todayCard.classList.add("highlight-target");
+      setTimeout(() => todayCard.classList.remove("highlight-target"), 1800);
+    }
+  }
 </script>
