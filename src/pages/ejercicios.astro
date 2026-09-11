@@ -284,6 +284,10 @@ import { genreExercises } from "@/data/genreExercises";
     const toggleId = details.querySelector<HTMLButtonElement>(".complete-toggle")?.dataset.id;
     if (!toggleId) return;
 
+    // Si llegamos con un link directo a este ejercicio (ej. desde /plan), lo
+    // dejamos abierto aunque ya esté hecho: el usuario quiere volver a verlo.
+    const isDeepLinkTarget = window.location.hash === `#${details.id}`;
+
     function sync() {
       const done = isCompleted(toggleId!);
       details.classList.toggle("done", done);
@@ -291,7 +295,7 @@ import { genreExercises } from "@/data/genreExercises";
     }
 
     // Si ya estaba marcado como hecho en una visita anterior, arranca colapsado.
-    if (sync()) {
+    if (sync() && !isDeepLinkTarget) {
       details.open = false;
     }
 
