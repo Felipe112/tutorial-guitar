@@ -15,7 +15,7 @@ export interface ChordShape {
   id: string;
   name: string;
   shortName: string;
-  type: "mayor" | "menor";
+  type: "mayor" | "menor" | "septima";
   difficulty: "abierto" | "cejilla";
   baseFret: number; // primer traste mostrado en el diagrama (1 = incluye la cejuela)
   positions: ChordPosition[]; // siempre 6 posiciones, una por cuerda, en traste ABSOLUTO
@@ -457,6 +457,151 @@ export const chords: ChordShape[] = [
 ];
 
 /**
+ * Acordes de séptima (dominante y menor con séptima). No son "mayores" ni
+ * "menores" puros: añaden una nota extra que crea tensión y pide resolver al
+ * acorde siguiente. Son la sal de casi todo el folk, el blues y la música
+ * tradicional latinoamericana, y todos estos se tocan sin cejilla.
+ */
+export const seventhChords: ChordShape[] = [
+  {
+    id: "e7",
+    name: "Mi séptima",
+    shortName: "E7",
+    type: "septima",
+    difficulty: "abierto",
+    baseFret: 1,
+    positions: [
+      { string: 0, fret: 0, finger: null },
+      { string: 1, fret: 2, finger: 2 },
+      { string: 2, fret: 0, finger: null },
+      { string: 3, fret: 1, finger: 1 },
+      { string: 4, fret: 0, finger: null },
+      { string: 5, fret: 0, finger: null },
+    ],
+    tip: "Es el acorde E al que le levantas el dedo de la 4ta cuerda. Solo 2 dedos y suena a blues.",
+  },
+  {
+    id: "a7",
+    name: "La séptima",
+    shortName: "A7",
+    type: "septima",
+    difficulty: "abierto",
+    baseFret: 1,
+    positions: [
+      { string: 0, fret: null, finger: null },
+      { string: 1, fret: 0, finger: null },
+      { string: 2, fret: 2, finger: 2 },
+      { string: 3, fret: 0, finger: null },
+      { string: 4, fret: 2, finger: 3 },
+      { string: 5, fret: 0, finger: null },
+    ],
+    tip: "El acorde A sin el dedo de la 3ra cuerda. No toques la 6ta.",
+  },
+  {
+    id: "d7",
+    name: "Re séptima",
+    shortName: "D7",
+    type: "septima",
+    difficulty: "abierto",
+    baseFret: 1,
+    positions: [
+      { string: 0, fret: null, finger: null },
+      { string: 1, fret: null, finger: null },
+      { string: 2, fret: 0, finger: null },
+      { string: 3, fret: 2, finger: 2 },
+      { string: 4, fret: 1, finger: 1 },
+      { string: 5, fret: 2, finger: 3 },
+    ],
+    tip: "Como Re mayor pero con los dedos invertidos. Solo se tocan 4 cuerdas (4ta a 1ra).",
+  },
+  {
+    id: "g7",
+    name: "Sol séptima",
+    shortName: "G7",
+    type: "septima",
+    difficulty: "abierto",
+    baseFret: 1,
+    positions: [
+      { string: 0, fret: 3, finger: 3 },
+      { string: 1, fret: 2, finger: 2 },
+      { string: 2, fret: 0, finger: null },
+      { string: 3, fret: 0, finger: null },
+      { string: 4, fret: 0, finger: null },
+      { string: 5, fret: 1, finger: 1 },
+    ],
+    tip: "El más usado de todos en música tradicional: es Sol mayor con el dedo 1 en el traste 1 de la 1ra cuerda.",
+  },
+  {
+    id: "c7",
+    name: "Do séptima",
+    shortName: "C7",
+    type: "septima",
+    difficulty: "abierto",
+    baseFret: 1,
+    positions: [
+      { string: 0, fret: null, finger: null },
+      { string: 1, fret: 3, finger: 3 },
+      { string: 2, fret: 2, finger: 2 },
+      { string: 3, fret: 3, finger: 4 },
+      { string: 4, fret: 1, finger: 1 },
+      { string: 5, fret: 0, finger: null },
+    ],
+    tip: "El acorde C más el meñique en el traste 3 de la 3ra cuerda. No toques la 6ta.",
+  },
+  {
+    id: "b7",
+    name: "Si séptima",
+    shortName: "B7",
+    type: "septima",
+    difficulty: "abierto",
+    baseFret: 1,
+    positions: [
+      { string: 0, fret: null, finger: null },
+      { string: 1, fret: 2, finger: 2 },
+      { string: 2, fret: 1, finger: 1 },
+      { string: 3, fret: 2, finger: 3 },
+      { string: 4, fret: 0, finger: null },
+      { string: 5, fret: 2, finger: 4 },
+    ],
+    tip: "La alternativa fácil al Si con cejilla: cuatro dedos, pero ninguno pisa dos cuerdas. No toques la 6ta.",
+  },
+  {
+    id: "am7",
+    name: "La menor séptima",
+    shortName: "Am7",
+    type: "septima",
+    difficulty: "abierto",
+    baseFret: 1,
+    positions: [
+      { string: 0, fret: null, finger: null },
+      { string: 1, fret: 0, finger: null },
+      { string: 2, fret: 2, finger: 2 },
+      { string: 3, fret: 0, finger: null },
+      { string: 4, fret: 1, finger: 1 },
+      { string: 5, fret: 0, finger: null },
+    ],
+    tip: "Am al que le quitas el dedo de la 3ra cuerda. Suena más suave y 'abierto' que Am.",
+  },
+  {
+    id: "em7",
+    name: "Mi menor séptima",
+    shortName: "Em7",
+    type: "septima",
+    difficulty: "abierto",
+    baseFret: 1,
+    positions: [
+      { string: 0, fret: 0, finger: null },
+      { string: 1, fret: 2, finger: 2 },
+      { string: 2, fret: 0, finger: null },
+      { string: 3, fret: 0, finger: null },
+      { string: 4, fret: 0, finger: null },
+      { string: 5, fret: 0, finger: null },
+    ],
+    tip: "El acorde más fácil de la guitarra: un solo dedo y las 6 cuerdas suenan.",
+  },
+];
+
+/**
  * Versiones fáciles (sin cejilla) de los acordes con cejilla: se sueltan una
  * o dos cuerdas para poder tocar cada nota con un dedo individual, sin que
  * ninguno tenga que pisar varias cuerdas a la vez. Suenan un poco más
@@ -756,7 +901,11 @@ export const chordAlternatives: ChordShape[] = [
 
 /** Busca un acorde por id entre las formas principales y sus alternativas. */
 export function chordById(id: string): ChordShape | undefined {
-  return chords.find((c) => c.id === id) ?? chordAlternatives.find((c) => c.id === id);
+  return (
+    chords.find((c) => c.id === id) ??
+    seventhChords.find((c) => c.id === id) ??
+    chordAlternatives.find((c) => c.id === id)
+  );
 }
 
 /** Id de la alternativa sin cejilla de un acorde, si existe. */

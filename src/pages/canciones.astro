@@ -1,0 +1,341 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import SongPlayer from "@/components/SongPlayer.astro";
+import StrummingPattern from "@/components/StrummingPattern.astro";
+import TabPlayer from "@/components/TabPlayer.astro";
+import ChordTag from "@/components/ChordTag.astro";
+import CompleteToggle from "@/components/CompleteToggle.astro";
+import Timer from "@/components/Timer.astro";
+import { songs, songLevels, totalBars } from "@/data/songs";
+---
+
+<Layout
+  title="Canciones"
+  description="Canciones tradicionales y de dominio público para principiantes: cifrado por compases, rasgueo, riffs en tablatura y reproducción para tocar encima."
+>
+  <h1 class="page-title">Canciones para tocar ya</h1>
+  <p class="page-lead">
+    Aquí se junta todo lo que practicas por separado: acordes, rasgueo y tablatura, dentro de una canción
+    de verdad. Cada tarjeta trae el cifrado compás a compás, el patrón de rasgueo y un botón para escuchar
+    la canción completa y tocar encima.
+  </p>
+
+  <div class="level-filters" role="tablist">
+    <button type="button" class="filter-pill active" data-filter="todas" role="tab" aria-selected="true">
+      Todas
+    </button>
+    {songLevels.map((lvl) => (
+      <button type="button" class:list={["filter-pill", `nivel-${lvl.level}`]} data-filter={String(lvl.level)} role="tab" aria-selected="false">
+        Nivel {lvl.level}
+      </button>
+    ))}
+  </div>
+
+  {songLevels.map((lvl) => (
+    <section class="level-section" data-level={String(lvl.level)}>
+      <h2 class="level-title">{lvl.label}</h2>
+      <p class="level-blurb">{lvl.blurb}</p>
+
+      <div class="song-list">
+        {songs.filter((s) => s.level === lvl.level).map((song) => (
+          <article class="song-card" id={song.id}>
+            <header class="song-head">
+              <div>
+                <h3>{song.title}</h3>
+                <p class="song-origin">{song.origin}</p>
+              </div>
+              <div class="song-meta">
+                <span class:list={["level-badge", `nivel-${song.level}`]}>Nivel {song.level}</span>
+                <span class="meta-chip">{song.timeSignature}</span>
+                <span class="meta-chip">{song.bpm} BPM</span>
+                <span class="meta-chip">{totalBars(song)} compases</span>
+              </div>
+            </header>
+
+            <p class="song-why">{song.why}</p>
+
+            <div class="song-chords">
+              <span class="block-label">Acordes que necesitas (pasa el cursor para ver la forma):</span>
+              <div class="chord-tags">
+                {song.chords.map((id) => <ChordTag chordId={id} />)}
+              </div>
+            </div>
+
+            <div class="song-block">
+              <span class="block-label">Cifrado — un acorde por compás</span>
+              <SongPlayer song={song} />
+            </div>
+
+            <div class="song-block">
+              <span class="block-label">
+                Rasgueo: {song.strumming.label}
+                {song.strumming.rhythmId && (
+                  <a class="inline-link" href={`/ritmos#${song.strumming.rhythmId}`}>ver en Ritmos →</a>
+                )}
+              </span>
+              <StrummingPattern pattern={song.strumming.pattern} bpm={song.bpm} id={`song-${song.id}`} />
+            </div>
+
+            {song.tab && (
+              <div class="song-block">
+                <span class="block-label">{song.tab.label}</span>
+                <TabPlayer notes={song.tab.notes} bpm={song.tab.bpm} />
+              </div>
+            )}
+
+            {song.melodyLink && (
+              <a class="melody-link" href={song.melodyLink.href}>🎵 {song.melodyLink.label} →</a>
+            )}
+
+            <details class="song-tips">
+              <summary>Cómo atacarla ({song.tips.length} consejos)</summary>
+              <ul>
+                {song.tips.map((tip) => <li>{tip}</li>)}
+              </ul>
+            </details>
+
+            <div class="song-actions">
+              <Timer id={`songs:${song.id}`} minutes={song.minutes} />
+              <CompleteToggle id={`songs:${song.id}`} label="Ya me sale" />
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  ))}
+
+  <section class="closing">
+    <h2>¿Y cuando estas se queden cortas?</h2>
+    <p>
+      Todas estas canciones son tradicionales o de dominio público, por eso están completas aquí. Cuando
+      las domines, el salto siguiente es aplicar lo mismo a canciones que te gusten: casi cualquier tema
+      pop usa 4 acordes y uno de los patrones de la sección <a href="/ritmos">Ritmos</a>. Busca su cifrado,
+      identifica el patrón y ya tienes la receta completa.
+    </p>
+  </section>
+</Layout>
+
+<style>
+  .level-filters {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.75rem;
+  }
+  .filter-pill {
+    background: var(--surface);
+    border: 1.5px solid var(--border-strong);
+    color: #475569;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 0.45rem 1rem;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .filter-pill.active {
+    background: #0f172a;
+    border-color: #0f172a;
+    color: white;
+  }
+  .filter-pill.nivel-1.active {
+    background: #dcfce7;
+    border-color: #166534;
+    color: #166534;
+  }
+  .filter-pill.nivel-2.active {
+    background: #fef3c7;
+    border-color: #92400e;
+    color: #92400e;
+  }
+  .filter-pill.nivel-3.active {
+    background: #fee2e2;
+    border-color: #b91c1c;
+    color: #b91c1c;
+  }
+  .level-section {
+    margin-top: 2.5rem;
+  }
+  .level-section:first-of-type {
+    margin-top: 0;
+  }
+  .level-section.level-hidden {
+    display: none;
+  }
+  .level-title {
+    margin-bottom: 0.25rem;
+  }
+  .level-blurb {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin: 0 0 1.25rem;
+    max-width: 44rem;
+  }
+  .song-list {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .song-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0.9rem;
+    padding: 1.4rem;
+    display: grid;
+    gap: 1rem;
+    min-width: 0;
+  }
+  .song-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .song-head h3 {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+  .song-origin {
+    margin: 0.15rem 0 0;
+    font-size: 0.8rem;
+    color: #94a3b8;
+  }
+  .song-meta {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .meta-chip {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: #475569;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .level-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .level-badge.nivel-1 {
+    background: #dcfce7;
+    color: #166534;
+  }
+  .level-badge.nivel-2 {
+    background: #fef3c7;
+    color: #92400e;
+  }
+  .level-badge.nivel-3 {
+    background: #fee2e2;
+    color: #b91c1c;
+  }
+  .song-why {
+    margin: 0;
+    color: #475569;
+  }
+  .song-block,
+  .song-chords {
+    display: grid;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+  .block-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #64748b;
+  }
+  .inline-link {
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 600;
+    color: #0f766e;
+    text-decoration: none;
+    margin-left: 0.5rem;
+  }
+  .inline-link:hover {
+    text-decoration: underline;
+  }
+  .chord-tags {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+  .melody-link {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #0f766e;
+    text-decoration: none;
+  }
+  .melody-link:hover {
+    text-decoration: underline;
+  }
+  .song-tips summary {
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+  }
+  .song-tips ul {
+    margin: 0.5rem 0 0;
+    padding-left: 1.2rem;
+    color: #475569;
+    font-size: 0.9rem;
+    display: grid;
+    gap: 0.35rem;
+  }
+  .song-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+    border-top: 1px solid var(--border);
+    padding-top: 0.9rem;
+  }
+  .closing {
+    margin-top: 3rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0.9rem;
+    padding: 1.4rem;
+  }
+  .closing h2 {
+    margin-top: 0;
+    font-size: 1.1rem;
+  }
+  .closing p {
+    margin: 0;
+    color: #475569;
+  }
+  .closing a {
+    color: #0f766e;
+    font-weight: 600;
+  }
+</style>
+
+<script>
+  const pills = document.querySelectorAll<HTMLButtonElement>(".filter-pill");
+  const sections = document.querySelectorAll<HTMLElement>(".level-section");
+
+  pills.forEach((pill) => {
+    pill.addEventListener("click", () => {
+      const target = pill.dataset.filter;
+      pills.forEach((p) => {
+        const isActive = p === pill;
+        p.classList.toggle("active", isActive);
+        p.setAttribute("aria-selected", String(isActive));
+      });
+      sections.forEach((s) => {
+        const show = target === "todas" || s.dataset.level === target;
+        s.classList.toggle("level-hidden", !show);
+      });
+    });
+  });
+</script>

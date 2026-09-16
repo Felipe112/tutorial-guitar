@@ -22,7 +22,7 @@ const originalChord = chord.alternativeTo ? chordById(chord.alternativeTo) : und
       {altId && (
         <a href={`#chord-${altId}`} class="alt-star" title="Ver alternativa sin cejilla">⭐</a>
       )}
-      <span class:list={["type-badge", chord.type]}>{chord.type}</span>
+      <span class:list={["type-badge", chord.type]}>{chord.type === "septima" ? "7ma" : chord.type}</span>
     </div>
   </div>
   {originalChord && (
@@ -137,6 +137,10 @@ const originalChord = chord.alternativeTo ? chordById(chord.alternativeTo) : und
   .type-badge.menor {
     background: #ede9fe;
     color: #6d28d9;
+  }
+  .type-badge.septima {
+    background: #ffedd5;
+    color: #c2410c;
   }
   .diagram-grid {
     display: grid;

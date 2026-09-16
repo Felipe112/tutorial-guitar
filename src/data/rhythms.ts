@@ -36,7 +36,7 @@ export const rhythms: RhythmPattern[] = [
     bpm: 80,
     minutes: 4,
     pattern: ["D", "-", "D", "U", "-", "U", "D", "U"],
-    description: "Muy usado en canciones acústicas. Cuenta: 1 (2) 3 4 (+) 5(y) — practica contando en voz alta.",
+    description: "Muy usado en canciones acústicas. Contando '1 y 2 y 3 y 4 y' rasgueas en: 1, 2, 2-y, 3-y, 4 y 4-y.",
   },
   {
     id: "rh-04",

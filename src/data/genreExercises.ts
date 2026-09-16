@@ -37,8 +37,8 @@ export const genreExercises: GenreCategory[] = [
         minutes: 8,
         description: "El acorde de dos notas que sostiene la mitad del rock.",
         steps: [
-          "Pisa la 6ta cuerda con el dedo 1 (empieza en el traste 0 = power chord E5).",
-          "Con el dedo 3, pisa la 5ta cuerda dos trastes más arriba (traste 2 para E5).",
+          "Empieza con la 6ta cuerda al aire (traste 0): esa es la nota raíz del power chord E5.",
+          "Con el dedo 3, pisa la 5ta cuerda dos trastes más arriba que la raíz (traste 2 para E5).",
           "No toques las cuerdas 4, 3, 2 ni 1. Rasguea solo esas dos cuerdas graves con fuerza.",
           "Mueve la misma forma al traste 3 (G5) y al traste 5 (A5) sin cambiar los dedos.",
         ],
@@ -387,10 +387,24 @@ export const genreExercises: GenreCategory[] = [
         minutes: 8,
         description: "Tocar una escala completa en una sola cuerda ayuda a interiorizar las distancias entre notas.",
         steps: [
-          "En la cuerda 3, toca Do-Re-Mi-Fa-Sol-La-Si-Do usando los dedos i-m alternados.",
+          "En la 2da cuerda (Si), toca los trastes 1-3-5-6-8-10-12-13: eso es Do-Re-Mi-Fa-Sol-La-Si-Do.",
+          "Alterna los dedos i-m de la mano derecha en cada nota.",
           "Sube y luego baja la escala completa, muy lento y parejo.",
-          "Apóyate en un afinador o piano para verificar que cada nota suene correcta.",
+          "Fíjate en la distancia: casi siempre 2 trastes, salvo entre Mi-Fa y Si-Do, que son 1.",
         ],
+        example: {
+          bpm: 70,
+          notes: [
+            { string: 4, fret: 1 },
+            { string: 4, fret: 3 },
+            { string: 4, fret: 5 },
+            { string: 4, fret: 6 },
+            { string: 4, fret: 8 },
+            { string: 4, fret: 10 },
+            { string: 4, fret: 12 },
+            { string: 4, fret: 13 },
+          ],
+        },
       },
       {
         id: "clasica-4",
@@ -606,10 +620,24 @@ export const genreExercises: GenreCategory[] = [
         minutes: 6,
         description: "La escala mayor es la base de casi todos los licks melódicos de country.",
         steps: [
-          "En la cuerda 2, toca Do-Re-Mi-Fa-Sol-La-Si-Do de ida y de vuelta.",
-          "Mantén un tempo constante, sin apurar las notas más fáciles.",
+          "Escala de Do mayor en primera posición: 5ta cuerda traste 3 (Do), 4ta al aire (Re), 4ta traste 2 (Mi), 4ta traste 3 (Fa).",
+          "Sigue con 3ra al aire (Sol), 3ra traste 2 (La), 2da al aire (Si) y 2da traste 1 (Do).",
+          "Tócala de ida y de vuelta a tempo constante, sin apurar las notas más fáciles.",
           "Cuando la domines, intenta tocarla de memoria sin mirar la mano.",
         ],
+        example: {
+          bpm: 80,
+          notes: [
+            { string: 1, fret: 3 },
+            { string: 2, fret: 0 },
+            { string: 2, fret: 2 },
+            { string: 2, fret: 3 },
+            { string: 3, fret: 0 },
+            { string: 3, fret: 2 },
+            { string: 4, fret: 0 },
+            { string: 4, fret: 1 },
+          ],
+        },
       },
       {
         id: "country-3",
@@ -625,10 +653,10 @@ export const genreExercises: GenreCategory[] = [
         example: {
           bpm: 90,
           notes: [
-            { string: 1, fret: 2 },
-            { string: 1, fret: 3 },
-            { string: 1, fret: 2 },
-            { string: 1, fret: 3 },
+            { string: 4, fret: 2 }, // 2da cuerda (Si), igual que en los pasos
+            { string: 4, fret: 3 },
+            { string: 4, fret: 2 },
+            { string: 4, fret: 3 },
           ],
         },
       },

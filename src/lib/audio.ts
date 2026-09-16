@@ -139,6 +139,14 @@ export function unlockAudio(): void {
   getCtx();
 }
 
+/**
+ * AudioContext compartido, para componentes que además de reproducir necesitan
+ * analizar audio en vivo (ej. el afinador por micrófono).
+ */
+export function getAudioContext(): AudioContext {
+  return getCtx();
+}
+
 // Frecuencias del acorde Em abierto (6 cuerdas), usado por defecto para simular rasgueos.
 const EM_CHORD_FREQUENCIES = [0, 1, 2, 3, 4, 5].map((s) => fretToFrequency(s, 0));
 

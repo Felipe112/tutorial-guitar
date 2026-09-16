@@ -1,0 +1,469 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { STANDARD_TUNING, fretToFrequency } from "@/lib/audio";
+
+const SPANISH_NAMES: Record<string, string> = {
+  C: "Do",
+  "C#": "Do#",
+  D: "Re",
+  "D#": "Re#",
+  E: "Mi",
+  F: "Fa",
+  "F#": "Fa#",
+  G: "Sol",
+  "G#": "Sol#",
+  A: "La",
+  "A#": "La#",
+  B: "Si",
+};
+
+const stringLabels = ["6ta", "5ta", "4ta", "3ra", "2da", "1ra"];
+
+// De la 1ra (aguda) a la 6ta (grave): así se ven en la tablatura del sitio.
+const strings = [5, 4, 3, 2, 1, 0].map((index) => ({
+  index,
+  label: stringLabels[index]!,
+  note: SPANISH_NAMES[STANDARD_TUNING[index]!.note]!,
+  english: `${STANDARD_TUNING[index]!.note}${STANDARD_TUNING[index]!.octave}`,
+  frequency: Math.round(fretToFrequency(index, 0) * 100) / 100,
+}));
+---
+
+<Layout
+  title="Afinador"
+  description="Afinador de guitarra: tonos de referencia para las 6 cuerdas y afinador por micrófono que detecta la nota y cuánto le falta."
+>
+  <h1 class="page-title">Afinador</h1>
+  <p class="page-lead">
+    Una guitarra desafinada hace que todo suene mal aunque toques perfecto. Afina antes de cada sesión,
+    no solo cuando "suena raro".
+  </p>
+
+  <section class="tuner-block">
+    <h2>1. Por oído: tonos de referencia</h2>
+    <p class="block-lead">
+      Pulsa una cuerda para escuchar cómo debería sonar, y ajusta la clavija hasta que tu cuerda suene igual.
+    </p>
+    <div class="string-grid">
+      {strings.map((s) => (
+        <button type="button" class="string-btn" data-string={s.index}>
+          <span class="string-name">{s.label}</span>
+          <span class="string-note">{s.note}</span>
+          <span class="string-detail">{s.english} · {s.frequency} Hz</span>
+        </button>
+      ))}
+    </div>
+  </section>
+
+  <section class="tuner-block">
+    <h2>2. Por micrófono: afinador en vivo</h2>
+    <p class="block-lead">
+      Toca una cuerda al aire y te dice qué nota está sonando y cuánto le falta. Todo ocurre en tu
+      navegador: el audio no sale de tu dispositivo.
+    </p>
+
+    <div class="mic-panel" id="mic-panel">
+      <button type="button" class="mic-btn" id="mic-btn">🎤 Activar micrófono</button>
+      <p class="mic-status" id="mic-status">Micrófono apagado.</p>
+
+      <div class="readout" id="readout" hidden>
+        <div class="readout-note">
+          <span class="detected-note" id="detected-note">—</span>
+          <span class="detected-target" id="detected-target">Toca una cuerda</span>
+        </div>
+        <div class="meter">
+          <div class="meter-track">
+            <div class="meter-center"></div>
+            <div class="meter-needle" id="meter-needle"></div>
+          </div>
+          <div class="meter-labels">
+            <span>♭ bemol (suelta)</span>
+            <span id="cents-value">0 cents</span>
+            <span>sostenida (tensa) ♯</span>
+          </div>
+        </div>
+        <p class="verdict" id="verdict">Esperando sonido…</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="tuner-block">
+    <h2>3. Sin afinador: el truco del traste 5</h2>
+    <ul class="trick-list">
+      <li>Traste 5 de la 6ta cuerda debe sonar igual que la 5ta al aire.</li>
+      <li>Traste 5 de la 5ta cuerda = 4ta al aire.</li>
+      <li>Traste 5 de la 4ta cuerda = 3ra al aire.</li>
+      <li><strong>Traste 4</strong> de la 3ra cuerda = 2da al aire (esta es la excepción).</li>
+      <li>Traste 5 de la 2da cuerda = 1ra al aire.</li>
+    </ul>
+    <p class="block-lead">
+      Ojo: este método afina la guitarra "consigo misma". Si la 6ta cuerda está desafinada respecto al
+      resto del mundo, toda la guitarra quedará desafinada igual. Por eso conviene partir del tono de
+      referencia de arriba o del micrófono.
+    </p>
+  </section>
+</Layout>
+
+<style>
+  .tuner-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0.9rem;
+    padding: 1.4rem;
+    margin-bottom: 1.5rem;
+  }
+  .tuner-block h2 {
+    margin: 0 0 0.35rem;
+    font-size: 1.1rem;
+  }
+  .block-lead {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin: 0 0 1rem;
+    max-width: 46rem;
+  }
+  .string-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+    gap: 0.75rem;
+  }
+  .string-btn {
+    background: #0f172a;
+    border: 2px solid transparent;
+    border-radius: 0.75rem;
+    padding: 0.9rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+    cursor: pointer;
+  }
+  .string-btn:hover,
+  .string-btn.ringing {
+    border-color: #f59e0b;
+  }
+  .string-name {
+    color: #94a3b8;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .string-note {
+    color: #fbbf24;
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+  }
+  .string-detail {
+    color: #64748b;
+    font-size: 0.68rem;
+    font-weight: 600;
+  }
+  .mic-panel {
+    display: grid;
+    gap: 0.75rem;
+  }
+  .mic-btn {
+    justify-self: start;
+    background: #0f766e;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .mic-btn.listening {
+    background: #b91c1c;
+  }
+  .mic-status {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+  .readout {
+    display: grid;
+    gap: 0.9rem;
+    background: #0f172a;
+    border-radius: 0.75rem;
+    padding: 1.2rem;
+  }
+  .readout-note {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .detected-note {
+    color: #fbbf24;
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .detected-target {
+    color: #94a3b8;
+    font-size: 0.85rem;
+  }
+  .meter-track {
+    position: relative;
+    height: 1.6rem;
+    background: #1e293b;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .meter-center {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #10b981;
+    transform: translateX(-50%);
+  }
+  .meter-needle {
+    position: absolute;
+    top: 0.25rem;
+    bottom: 0.25rem;
+    width: 0.4rem;
+    border-radius: 999px;
+    background: #f59e0b;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: left 0.08s linear, background 0.15s ease;
+  }
+  .meter-needle.in-tune {
+    background: #10b981;
+  }
+  .meter-labels {
+    display: flex;
+    justify-content: space-between;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 600;
+    margin-top: 0.35rem;
+  }
+  #cents-value {
+    color: #cbd5e1;
+    font-variant-numeric: tabular-nums;
+  }
+  .verdict {
+    margin: 0;
+    color: #e2e8f0;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+  .trick-list {
+    margin: 0 0 1rem;
+    padding-left: 1.2rem;
+    color: #475569;
+    display: grid;
+    gap: 0.3rem;
+  }
+</style>
+
+<script>
+  import { fretToFrequency, getAudioContext, pluckNote, unlockAudio } from "@/lib/audio";
+
+  const SPANISH_NAMES = ["Do", "Do#", "Re", "Re#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si"];
+  const STRING_LABELS = ["6ta", "5ta", "4ta", "3ra", "2da", "1ra"];
+  const OPEN_STRING_FREQS = [0, 1, 2, 3, 4, 5].map((s) => fretToFrequency(s, 0));
+
+  // ---------- Tonos de referencia ----------
+  document.querySelectorAll<HTMLButtonElement>(".string-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      unlockAudio();
+      const index = Number(btn.dataset.string);
+      pluckNote(fretToFrequency(index, 0), 2.2);
+      btn.classList.add("ringing");
+      window.setTimeout(() => btn.classList.remove("ringing"), 2200);
+    });
+  });
+
+  // ---------- Afinador por micrófono ----------
+  const micBtn = document.getElementById("mic-btn") as HTMLButtonElement | null;
+  const micStatus = document.getElementById("mic-status");
+  const readout = document.getElementById("readout");
+  const noteEl = document.getElementById("detected-note");
+  const targetEl = document.getElementById("detected-target");
+  const needleEl = document.getElementById("meter-needle");
+  const centsEl = document.getElementById("cents-value");
+  const verdictEl = document.getElementById("verdict");
+
+  let stream: MediaStream | null = null;
+  let rafId: number | undefined;
+
+  /**
+   * Detección de tono por autocorrelación: busca el periodo que mejor se repite
+   * dentro del buffer. Devuelve la frecuencia en Hz, o null si la señal es
+   * demasiado débil o demasiado ruidosa para fiarse.
+   */
+  function detectPitch(buffer: Float32Array, sampleRate: number): number | null {
+    const size = buffer.length;
+
+    let rms = 0;
+    for (let i = 0; i < size; i++) rms += buffer[i]! * buffer[i]!;
+    rms = Math.sqrt(rms / size);
+    if (rms < 0.01) return null; // silencio
+
+    // Recorta los extremos por debajo del 20% del pico para limitar el ruido.
+    const threshold = 0.2;
+    let start = 0;
+    let end = size - 1;
+    while (start < size / 2 && Math.abs(buffer[start]!) < threshold) start++;
+    while (end > size / 2 && Math.abs(buffer[end]!) < threshold) end--;
+    const trimmed = buffer.slice(start, end);
+    const trimmedSize = trimmed.length;
+    if (trimmedSize < 512) return null;
+
+    const correlations = new Float32Array(trimmedSize);
+    for (let lag = 0; lag < trimmedSize; lag++) {
+      let sum = 0;
+      for (let i = 0; i < trimmedSize - lag; i++) sum += trimmed[i]! * trimmed[i + lag]!;
+      correlations[lag] = sum;
+    }
+
+    // Salta la caída inicial y busca el primer máximo real.
+    let lag = 0;
+    while (lag < trimmedSize - 1 && correlations[lag]! > correlations[lag + 1]!) lag++;
+
+    let maxValue = -1;
+    let maxLag = -1;
+    for (let i = lag; i < trimmedSize; i++) {
+      if (correlations[i]! > maxValue) {
+        maxValue = correlations[i]!;
+        maxLag = i;
+      }
+    }
+    if (maxLag <= 0) return null;
+
+    // Interpolación parabólica para afinar el pico al sub-sample.
+    const y1 = correlations[maxLag - 1] ?? 0;
+    const y2 = correlations[maxLag]!;
+    const y3 = correlations[maxLag + 1] ?? 0;
+    const a = (y1 + y3 - 2 * y2) / 2;
+    const b = (y3 - y1) / 2;
+    const refinedLag = a !== 0 ? maxLag - b / (2 * a) : maxLag;
+
+    const frequency = sampleRate / refinedLag;
+    if (frequency < 60 || frequency > 1400) return null; // fuera del rango útil de la guitarra
+    return frequency;
+  }
+
+  /** Nombre en español, octava y desviación en cents para una frecuencia dada. */
+  function describeFrequency(frequency: number) {
+    const semitonesFromA4 = 12 * Math.log2(frequency / 440);
+    const nearest = Math.round(semitonesFromA4);
+    const exact = 440 * Math.pow(2, nearest / 12);
+    const cents = Math.round(1200 * Math.log2(frequency / exact));
+    // A4 es el semitono 57 contando desde C0.
+    const semitoneFromC0 = nearest + 57;
+    const name = SPANISH_NAMES[((semitoneFromC0 % 12) + 12) % 12]!;
+    const octave = Math.floor(semitoneFromC0 / 12);
+    return { name, octave, cents };
+  }
+
+  /** Cuerda al aire más cercana a la frecuencia detectada. */
+  function nearestString(frequency: number): number {
+    let best = 0;
+    let bestDistance = Infinity;
+    OPEN_STRING_FREQS.forEach((f, i) => {
+      const distance = Math.abs(12 * Math.log2(frequency / f));
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        best = i;
+      }
+    });
+    return best;
+  }
+
+  function render(frequency: number | null) {
+    if (!noteEl || !targetEl || !needleEl || !centsEl || !verdictEl) return;
+    if (frequency === null) {
+      verdictEl.textContent = "Esperando sonido… toca una cuerda al aire.";
+      return;
+    }
+    const { name, octave, cents } = describeFrequency(frequency);
+    const stringIndex = nearestString(frequency);
+
+    noteEl.textContent = `${name}${octave}`;
+    targetEl.textContent = `≈ cuerda ${STRING_LABELS[stringIndex]} · ${frequency.toFixed(1)} Hz`;
+    centsEl.textContent = `${cents > 0 ? "+" : ""}${cents} cents`;
+
+    const clamped = Math.max(-50, Math.min(50, cents));
+    needleEl.style.left = `${50 + clamped}%`;
+
+    const inTune = Math.abs(cents) <= 5;
+    needleEl.classList.toggle("in-tune", inTune);
+    verdictEl.textContent = inTune
+      ? "✅ Afinada. Pasa a la siguiente cuerda."
+      : cents < 0
+        ? "⬆️ Suena grave: tensa un poco la clavija."
+        : "⬇️ Suena aguda: suelta un poco la clavija.";
+  }
+
+  function stopMic() {
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = undefined;
+    stream?.getTracks().forEach((track) => track.stop());
+    stream = null;
+    if (micBtn) {
+      micBtn.textContent = "🎤 Activar micrófono";
+      micBtn.classList.remove("listening");
+    }
+    if (micStatus) micStatus.textContent = "Micrófono apagado.";
+    readout?.setAttribute("hidden", "");
+  }
+
+  async function startMic() {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      if (micStatus) {
+        micStatus.textContent =
+          "Este navegador no permite usar el micrófono. Usa los tonos de referencia de arriba.";
+      }
+      return;
+    }
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+      });
+    } catch {
+      if (micStatus) {
+        micStatus.textContent =
+          "No se pudo acceder al micrófono (permiso denegado). Puedes afinar con los tonos de referencia.";
+      }
+      return;
+    }
+
+    const ctx = getAudioContext();
+    const source = ctx.createMediaStreamSource(stream);
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 2048;
+    source.connect(analyser);
+    const buffer = new Float32Array(analyser.fftSize);
+
+    if (micBtn) {
+      micBtn.textContent = "■ Apagar micrófono";
+      micBtn.classList.add("listening");
+    }
+    if (micStatus) micStatus.textContent = "Escuchando… toca una cuerda al aire, fuerte y sola.";
+    readout?.removeAttribute("hidden");
+
+    const loop = () => {
+      analyser.getFloatTimeDomainData(buffer);
+      render(detectPitch(buffer, ctx.sampleRate));
+      rafId = requestAnimationFrame(loop);
+    };
+    loop();
+  }
+
+  micBtn?.addEventListener("click", () => {
+    if (stream) {
+      stopMic();
+    } else {
+      void startMic();
+    }
+  });
+
+  window.addEventListener("pagehide", stopMic);
+</script>
