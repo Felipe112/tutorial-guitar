@@ -126,8 +126,8 @@ export const exercises: Exercise[] = [
     example: {
       bpm: 70,
       notes: [
-        { string: 2, fret: 3, beats: 1 },
-        { string: 2, fret: 5, beats: 1 },
+        { string: 3, fret: 3, beats: 1 }, // 3ra cuerda (Sol), igual que en los pasos
+        { string: 3, fret: 5, beats: 1 },
       ],
     },
   },

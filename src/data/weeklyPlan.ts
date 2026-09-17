@@ -38,6 +38,7 @@ const WEEKDAY_TEMPLATES: DayTemplate[] = [
     optionalItems: [
       { label: "Metal: Alternate picking en una cuerda", href: "/ejercicios#metal-3", icon: "🤘" },
       { label: "Clásica: Apoyando (rest stroke)", href: "/ejercicios#clasica-1", icon: "🎻" },
+      { label: "Canción: La Bamba (riff de introducción)", href: "/canciones#song-la-bamba", icon: "🎼" },
     ],
     minutes: 25,
   },
@@ -54,6 +55,7 @@ const WEEKDAY_TEMPLATES: DayTemplate[] = [
     optionalItems: [
       { label: "Pop: Cambios rápidos a tempo", href: "/ejercicios#pop-3", icon: "🎤" },
       { label: "Punk: Cambio de 2 power chords veloz", href: "/ejercicios#punk-2", icon: "⚡" },
+      { label: "Canción: La Cucaracha (dos acordes)", href: "/canciones#song-la-cucaracha", icon: "🎼" },
     ],
     minutes: 25,
   },
@@ -70,6 +72,7 @@ const WEEKDAY_TEMPLATES: DayTemplate[] = [
     optionalItems: [
       { label: "Reggae: Skank en contratiempo", href: "/ejercicios#reggae-1", icon: "🌴" },
       { label: "Blues: Shuffle con palm mute", href: "/ejercicios#blues-1", icon: "🎺" },
+      { label: "Canción: Oh! Susanna (patrón folk)", href: "/canciones#song-oh-susana", icon: "🎼" },
     ],
     minutes: 25,
   },
@@ -86,6 +89,7 @@ const WEEKDAY_TEMPLATES: DayTemplate[] = [
     optionalItems: [
       { label: "Clásica: Arpegio clásico sobre Am", href: "/ejercicios#clasica-2", icon: "🎻" },
       { label: "Folclor: Arpegio con bajo alternante", href: "/ejercicios#folclor-2", icon: "🪕" },
+      { label: "Canción: The House of the Rising Sun (arpegio)", href: "/canciones#song-house-rising-sun", icon: "🎼" },
     ],
     minutes: 25,
   },
@@ -102,6 +106,7 @@ const WEEKDAY_TEMPLATES: DayTemplate[] = [
     optionalItems: [
       { label: "Country: Hammer-on rápido estilo country", href: "/ejercicios#country-3", icon: "🤠" },
       { label: "Blues: Bend suave de medio tono", href: "/ejercicios#blues-2", icon: "🎺" },
+      { label: "Canción: Blues de 12 compases en Mi", href: "/canciones#song-blues-12-mi", icon: "🎼" },
     ],
     minutes: 25,
   },
@@ -118,6 +123,7 @@ const WEEKDAY_TEMPLATES: DayTemplate[] = [
     optionalItems: [
       { label: "Country: Escala mayor para licks", href: "/ejercicios#country-2", icon: "🤠" },
       { label: "Jazz: Caminata de bajo simple", href: "/ejercicios#jazz-4", icon: "🎷" },
+      { label: "Canción: When the Saints Go Marching In", href: "/canciones#song-when-saints", icon: "🎼" },
     ],
     minutes: 25,
   },
@@ -134,6 +140,7 @@ const WEEKDAY_TEMPLATES: DayTemplate[] = [
     optionalItems: [
       { label: "Rock: Power chord básico (5ta)", href: "/ejercicios#rock-1", icon: "🎸" },
       { label: "Flamenco: Rasgueo básico de un dedo", href: "/ejercicios#flamenco-1", icon: "💃" },
+      { label: "Canción: Cumpleaños feliz (vals 3/4)", href: "/canciones#song-cumpleanos", icon: "🎼" },
     ],
     minutes: 20,
   },

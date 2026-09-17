@@ -7,7 +7,9 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "check": "node scripts/check-tabs.mjs && astro check",
+    "check:tabs": "node scripts/check-tabs.mjs",
+    "build": "node scripts/check-tabs.mjs && astro build",
     "preview": "astro preview",
     "astro": "astro"
   },

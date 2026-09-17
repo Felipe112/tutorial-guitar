@@ -1,0 +1,274 @@
+---
+import { chordById } from "@/data/chords";
+import { fretToFrequency } from "@/lib/audio";
+import type { Song } from "@/data/songs";
+
+interface Props {
+  song: Song;
+}
+const { song } = Astro.props;
+
+/**
+ * Frecuencias reales de cada acorde usado, calculadas en build a partir de la
+ * forma del acorde (mismos trastes que verías en el diagrama). Las cuerdas
+ * apagadas (fret === null) simplemente no suenan.
+ */
+const chordFrequencies: Record<string, number[]> = {};
+for (const id of new Set(song.sections.flatMap((s) => s.bars))) {
+  const chord = chordById(id);
+  if (!chord) continue;
+  chordFrequencies[id] = chord.positions
+    .filter((p) => p.fret !== null)
+    .sort((a, b) => a.string - b.string)
+    .map((p) => fretToFrequency(p.string, p.fret!));
+}
+
+const chordLabels: Record<string, string> = {};
+for (const id of Object.keys(chordFrequencies)) {
+  chordLabels[id] = chordById(id)?.shortName ?? id;
+}
+
+// Índice global de compás, para poder resaltar el avance a lo largo de toda la canción.
+let barCounter = 0;
+const sections = song.sections.map((section) => ({
+  ...section,
+  bars: section.bars.map((chordId) => ({ chordId, index: barCounter++ })),
+}));
+const totalBars = barCounter;
+---
+
+<div
+  class="song-player"
+  data-song={song.id}
+  data-bpm={song.bpm}
+  data-pattern={JSON.stringify(song.strumming.pattern)}
+  data-chords={JSON.stringify(chordFrequencies)}
+  data-bars={JSON.stringify(sections.flatMap((s) => s.bars.map((b) => b.chordId)))}
+>
+  <div class="sp-sections">
+    {sections.map((section) => (
+      <div class="sp-section">
+        <div class="sp-section-head">
+          <span class="sp-section-name">{section.name}</span>
+          {section.note && <span class="sp-section-note">{section.note}</span>}
+        </div>
+        <div class="sp-bars">
+          {section.bars.map((bar) => (
+            <div class="sp-bar" data-bar={bar.index}>
+              <span class="sp-bar-chord">{chordLabels[bar.chordId] ?? bar.chordId}</span>
+              <span class="sp-bar-count">{song.timeSignature}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <div class="sp-controls">
+    <button type="button" class="sp-play">▶ Tocar canción completa</button>
+    <label class="sp-bpm-label">
+      BPM
+      <input type="number" class="sp-bpm" min="40" max="200" value={song.bpm} />
+    </label>
+    <label class="sp-loop-label">
+      <input type="checkbox" class="sp-loop" />
+      Repetir
+    </label>
+    <span class="sp-progress"><span class="sp-progress-now">0</span> / {totalBars} compases</span>
+  </div>
+  <p class="sp-hint">
+    Suena el acorde de cada compás con el rasgueo de la canción. Toca tú encima, siguiendo el compás resaltado.
+  </p>
+</div>
+
+<style>
+  .song-player {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    min-width: 0;
+  }
+  .sp-sections {
+    display: grid;
+    gap: 0.75rem;
+  }
+  .sp-section-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+  }
+  .sp-section-name {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #64748b;
+  }
+  .sp-section-note {
+    font-size: 0.78rem;
+    color: #94a3b8;
+  }
+  .sp-bars {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .sp-bar {
+    min-width: 4.25rem;
+    flex: 0 0 auto;
+    background: #0f172a;
+    border: 2px solid transparent;
+    border-radius: 0.6rem;
+    padding: 0.5rem 0.65rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1rem;
+  }
+  .sp-bar-chord {
+    color: #fbbf24;
+    font-weight: 800;
+    font-size: 1.05rem;
+    line-height: 1.1;
+  }
+  .sp-bar-count {
+    color: #64748b;
+    font-size: 0.65rem;
+    font-weight: 600;
+  }
+  .sp-bar.active {
+    border-color: #f59e0b;
+    background: #1e293b;
+    transform: translateY(-2px);
+  }
+  .sp-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .sp-play {
+    background: #0f766e;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.55rem 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .sp-bpm-label,
+  .sp-loop-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    color: #475569;
+  }
+  .sp-bpm {
+    width: 4.25rem;
+    padding: 0.25rem;
+    border-radius: 0.375rem;
+    border: 1px solid var(--border-strong);
+  }
+  .sp-progress {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-variant-numeric: tabular-nums;
+  }
+  .sp-hint {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #64748b;
+  }
+</style>
+
+<script>
+  import { strumFrequencies, unlockAudio } from "@/lib/audio";
+  import type { Stroke } from "@/data/rhythms";
+
+  /**
+   * Reproduce una canción completa: recorre compás a compás rasgueando el
+   * acorde correspondiente con el patrón de la canción, y resalta el compás
+   * que está sonando para poder tocar encima.
+   */
+  function initSongPlayer(root: HTMLElement) {
+    const pattern = JSON.parse(root.dataset.pattern ?? "[]") as Stroke[];
+    const chordFreqs = JSON.parse(root.dataset.chords ?? "{}") as Record<string, number[]>;
+    const barChordIds = JSON.parse(root.dataset.bars ?? "[]") as string[];
+    const defaultBpm = Number(root.dataset.bpm ?? 90);
+
+    const playBtn = root.querySelector<HTMLButtonElement>(".sp-play")!;
+    const bpmInput = root.querySelector<HTMLInputElement>(".sp-bpm")!;
+    const loopInput = root.querySelector<HTMLInputElement>(".sp-loop")!;
+    const progressEl = root.querySelector<HTMLElement>(".sp-progress-now")!;
+    const barEls = Array.from(root.querySelectorAll<HTMLElement>(".sp-bar"));
+
+    let timerId: number | undefined;
+    let playing = false;
+
+    function clearActive() {
+      barEls.forEach((el) => el.classList.remove("active"));
+    }
+
+    function stop() {
+      playing = false;
+      playBtn.textContent = "▶ Tocar canción completa";
+      if (timerId) window.clearInterval(timerId);
+      timerId = undefined;
+      clearActive();
+      progressEl.textContent = "0";
+    }
+
+    function play() {
+      unlockAudio();
+      playing = true;
+      playBtn.textContent = "■ Detener";
+      const bpm = Number(bpmInput.value) || defaultBpm;
+      const eighthMs = (60 / bpm / 2) * 1000;
+      let barIndex = 0;
+      let step = 0;
+
+      const tick = () => {
+        if (step === 0) {
+          clearActive();
+          barEls[barIndex]?.classList.add("active");
+          progressEl.textContent = String(barIndex + 1);
+        }
+        const stroke = pattern[step];
+        if (stroke === "D" || stroke === "U") {
+          const freqs = chordFreqs[barChordIds[barIndex]!];
+          if (freqs?.length) strumFrequencies(freqs, stroke);
+        }
+        step += 1;
+        if (step >= pattern.length) {
+          step = 0;
+          barIndex += 1;
+          if (barIndex >= barChordIds.length) {
+            if (loopInput.checked) {
+              barIndex = 0;
+            } else {
+              stop();
+            }
+          }
+        }
+      };
+
+      tick();
+      timerId = window.setInterval(tick, eighthMs);
+    }
+
+    playBtn.addEventListener("click", () => {
+      playing ? stop() : play();
+    });
+    bpmInput.addEventListener("change", () => {
+      if (playing) {
+        stop();
+        play();
+      }
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>(".song-player").forEach(initSongPlayer);
+</script>

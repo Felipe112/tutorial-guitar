@@ -1,43 +1,55 @@
-# Astro Starter Kit: Minimal
+# Tutorial Guitar 🎸
 
-```sh
-pnpm create astro@latest -- --template minimal
-```
+App estática (Astro + Tailwind) para aprender guitarra desde cero. Todo corre en
+el navegador: no hay backend y el progreso se guarda en `localStorage`.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Secciones
 
-## 🚀 Project Structure
+| Ruta | Qué hay |
+| :--- | :--- |
+| `/` | Progreso: racha, ejercicios, canciones y plan elegido |
+| `/plan` | Rutina semanal, quincenal o mensual |
+| `/ejercicios` | Ejercicios generales + ejercicios por género musical |
+| `/acordes` | Mayores, menores, séptimas, cejilla y alternativas sin cejilla |
+| `/ritmos` | Patrones de rasgueo con audio, más ritmos por género |
+| `/teoria` | Ritmo, melodía, armonía, compases, escalas |
+| `/arpegios` | Arpegios generados a partir de la forma real de cada acorde |
+| `/melodias` | 30 melodías en tablatura tocable |
+| `/canciones` | Canciones completas: cifrado por compases, rasgueo, riffs y play-along |
+| `/retos` | Reto diario y racha |
+| `/afinador` | Tonos de referencia por cuerda y afinador por micrófono |
 
-Inside of your Astro project, you'll see the following folders and files:
+## Convención de cuerdas (importante)
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+En todos los datos (`src/data/*.ts`) el índice de cuerda es **0 = 6ta (Mi grave)
+… 5 = 1ra (Mi aguda)**. La tablatura se dibuja al revés (arriba la 1ra), igual
+que en cualquier tab impresa. Confundir ambas numeraciones es el error más fácil
+de cometer al escribir contenido nuevo, por eso existe el lint de abajo.
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## Comandos
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+| Comando | Acción |
+| :--- | :--- |
+| `pnpm install` | Instala dependencias |
+| `pnpm dev` | Servidor local en `localhost:4321` |
+| `pnpm check:tabs` | Lint de contenido musical (ver abajo) |
+| `pnpm check` | Lint de contenido + `astro check` (tipos) |
+| `pnpm build` | Lint de contenido + build a `./dist/` |
+| `pnpm preview` | Previsualiza el build |
 
-Any static assets, like images, can be placed in the `public/` directory.
+### Lint de contenido musical
 
-## 🧞 Commands
+`scripts/check-tabs.mjs` corre automáticamente antes de cada build y verifica:
 
-All commands are run from the root of the project, from a terminal:
+1. Índices de cuerda dentro de 0..5 y trastes posibles.
+2. Que si un texto dice "cuerda 3", la tablatura de ese mismo bloque marque esa
+   cuerda (el desajuste texto ↔ tablatura).
+3. Que cada patrón de rasgueo tenga tantas posiciones como su compás (8 en 4/4,
+   6 en 3/4 y 6/8).
+4. Que las canciones solo usen ids de acorde que existan en `src/data/chords.ts`.
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
+## Contenido y derechos
 
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+Las canciones de `/canciones` son tradicionales o de dominio público, y se
+publican solo como cifrado, patrón de rasgueo y tablatura propia: no se
+reproduce ninguna letra.

@@ -3,6 +3,7 @@ import Layout from "@/layouts/Layout.astro";
 import { exercises } from "@/data/exercises";
 import { genreExercises } from "@/data/genreExercises";
 import { weeklyPlan, buildExtendedPlan } from "@/data/weeklyPlan";
+import { songs } from "@/data/songs";
 
 const totalExercises =
   exercises.length + genreExercises.reduce((sum, g) => sum + g.exercises.length, 0);
@@ -12,6 +13,8 @@ const planKeysByVariant = {
   quincenal: buildExtendedPlan(15, "quincenal").map((d) => `plan:${d.key}`),
   mensual: buildExtendedPlan(30, "mensual").map((d) => `plan:${d.key}`),
 };
+
+const totalSongs = songs.length;
 
 const planLabels = {
   semanal: "plan semanal",
@@ -63,10 +66,22 @@ const sections = [
     desc: "Tablaturas interactivas con reproducción nota por nota.",
   },
   {
+    href: "/canciones",
+    emoji: "🎼",
+    title: "Canciones",
+    desc: "Canciones completas con cifrado, rasgueo y riffs, para tocar encima desde el primer día.",
+  },
+  {
     href: "/retos",
     emoji: "🔥",
     title: "Retos diarios",
     desc: "Un reto nuevo cada día. Súmalos y construye tu racha.",
+  },
+  {
+    href: "/afinador",
+    emoji: "🎧",
+    title: "Afinador",
+    desc: "Tonos de referencia por cuerda y afinador por micrófono, sin salir del navegador.",
   },
 ];
 ---
@@ -91,6 +106,14 @@ const sections = [
         </div>
         <div class="progress-track"><div class="progress-fill" id="exercises-fill"></div></div>
         <span class="stat-label">ejercicios completados</span>
+      </div>
+      <div class="stat-card progress-card">
+        <div class="progress-head">
+          <span class="stat-value" id="stat-songs-pct">0%</span>
+          <span class="progress-count" id="songs-count">0 / {totalSongs}</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="songs-fill"></div></div>
+        <span class="stat-label">canciones que ya te salen</span>
       </div>
       <div class="stat-card progress-card">
         <div class="progress-head">
@@ -200,7 +223,7 @@ const sections = [
   }
 </style>
 
-<script type="application/json" id="home-progress-data" is:inline set:html={JSON.stringify({ totalExercises, planKeysByVariant, planLabels })} />
+<script type="application/json" id="home-progress-data" is:inline set:html={JSON.stringify({ totalExercises, totalSongs, planKeysByVariant, planLabels })} />
 
 <script>
   import {
@@ -214,12 +237,13 @@ const sections = [
 
   interface ProgressData {
     totalExercises: number;
+    totalSongs: number;
     planKeysByVariant: Record<PlanId, string[]>;
     planLabels: Record<PlanId, string>;
   }
 
   const dataEl = document.getElementById("home-progress-data");
-  const { totalExercises, planKeysByVariant, planLabels } = JSON.parse(
+  const { totalExercises, totalSongs, planKeysByVariant, planLabels } = JSON.parse(
     dataEl?.textContent ?? "{}",
   ) as ProgressData;
 
@@ -237,6 +261,16 @@ const sections = [
   if (exPctEl) exPctEl.textContent = `${exercisesPct}%`;
   if (exCountEl) exCountEl.textContent = `${exercisesDone} / ${totalExercises}`;
   if (exFillEl) exFillEl.style.width = `${exercisesPct}%`;
+
+  // Canciones marcadas como "ya me sale" en /canciones.
+  const songsDone = countCompletedByPrefix("songs:");
+  const songsPct = totalSongs > 0 ? Math.round((songsDone / totalSongs) * 100) : 0;
+  const songsPctEl = document.getElementById("stat-songs-pct");
+  const songsCountEl = document.getElementById("songs-count");
+  const songsFillEl = document.getElementById("songs-fill") as HTMLElement | null;
+  if (songsPctEl) songsPctEl.textContent = `${songsPct}%`;
+  if (songsCountEl) songsCountEl.textContent = `${songsDone} / ${totalSongs}`;
+  if (songsFillEl) songsFillEl.style.width = `${songsPct}%`;
 
   // Plan elegido (semanal/quincenal/mensual), recordado desde /plan.
   const selectedPlan = getSelectedPlan();

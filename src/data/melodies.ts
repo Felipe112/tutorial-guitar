@@ -12,9 +12,11 @@ export interface Melody {
   notes: MelodyNote[];
 }
 
-// Notas usadas en la mayoría de estas melodías, todas en primera posición
-// (cuerdas 4/3ra, 5/2da y 6/1ra, trastes 0-8), con su equivalente real según
-// la afinación estándar (verificado con @/lib/audio fretToNote):
+// Notas usadas en la mayoría de estas melodías, todas en primera posición.
+// Recordatorio del índice: 0 = 6ta (Mi grave) .. 5 = 1ra (Mi aguda), así que
+// aquí se usan la 3ra (índice 3), la 2da (índice 4) y la 1ra (índice 5),
+// trastes 0-8. Equivalencia real en afinación estándar (verificada con
+// @/lib/audio fretToNote):
 //   Sol3=(3,0)  La3=(3,2)  Si3=(4,0)  Do4=(4,1)  Re4=(4,3)
 //   Mi4=(5,0)   Fa4=(5,1)  Sol4=(5,3) La4=(5,5)  Do5=(5,8)
 
